@@ -1,12 +1,13 @@
 # Codeplain CLI (cloned third-party repo, has its own git history)
 plain2code_client/
 
-# Codeplain generated output
-build/
+# Dependencies & build artifacts
+node_modules/
 dist/
 plain_modules/
 conformance_tests/
 
-# Logs / env
+# Logs / env / tool output
 *.log
 .env
+.playwright-mcp/

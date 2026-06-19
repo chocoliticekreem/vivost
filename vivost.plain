@@ -1,0 +1,149 @@
+---
+description: 'Vivost — a booking-style directory front-end for adult-services listings, rendered with placeholder data only.'
+import:
+  - typescript-react-app-template
+requires:
+  - typescript-react-app-boilerplate
+---
+
+***definitions***
+
+- :Category: is a service category used to group listings. The standard categories are "Escorts", "Massage", "Companionship", and "Virtual" (online or remote).
+
+- :Profile: is a single placeholder listing for a service provider. A :Profile: has an id, a placeholder display name, a :Category:, a placeholder location (a city name), a placeholder hourly rate, a placeholder availability label, a placeholder image represented as a solid colour block (no external image is loaded), a non-explicit placeholder description, and a small list of attribute label and value pairs. All values are placeholder data and do not describe real people.
+
+- :PlaceholderData: is the in-memory dataset of :Category: and :Profile: records, held in TypeScript modules, that stands in for a future database.
+
+- :AgeGate: is an age-verification gate, shown over :App: on first visit, that requires the visitor to confirm they are 18 years of age or older before any other content becomes interactive.
+
+- :Header: is the navigation bar shown at the top of every page of :App:.
+
+- :Footer: is the section shown at the bottom of every page of :App:, including safety information and a clear 18-and-over age statement.
+
+
+***implementation reqs***
+
+- :App: should use the react-router-dom library for client-side routing between pages.
+
+- :App: should present a clean booking-style visual theme: a solid dark-blue :Header: bar, a light grey page background, white content cards with rounded corners and a subtle shadow, and a single amber accent colour used for primary buttons. The theme colours should be defined once as CSS custom properties and reused, so the design can be re-themed in one place.
+
+- All content displayed by :App: must come from :PlaceholderData: defined in TypeScript modules under "src/data"; :App: must not make any network or backend request for data. Each field of a :Profile: should map cleanly to a future database column.
+
+- All placeholder content must be non-explicit and safe for work: generic display names such as "Profile 1", lorem-ipsum style descriptions, and plain solid-colour blocks in place of photographs. :App: must not request or embed any external image.
+
+- :App: should be responsive and usable on both mobile-phone and desktop screen widths.
+
+- The :Header: and :Footer: should appear on every page of :App:.
+
+
+***functional specs***
+
+- Build the application shell for :App:: a global layout containing the :Header: and :Footer: on every route, client-side routing with react-router-dom, the booking-style theme, and the :AgeGate:.
+
+    - The :Header: shows a "Vivost" wordmark logo on the left, a set of :Category: navigation links, a location-selector placeholder control, an account icon, and a prominent amber "Post an ad" button.
+
+    - Configure routes for the home page at "/", the search-results page at "/search", and the profile-detail page at "/profile/:id". For this functionality the "/search" and "/profile/:id" routes may render simple placeholder page components; later functionalities fill them in.
+
+    - The :Footer: shows several columns of placeholder navigation links, a short "Safety" column with placeholder safety-advice links and a "Report a listing" link, and a clearly visible statement that the site is strictly for adults aged 18 and over.
+
+    - On first load, the :AgeGate: is shown as a modal overlay covering the page. It states that the visitor must be 18 or older to continue and offers an "I am 18 or older — Enter" button and a "Leave" button. Choosing to enter hides the :AgeGate: and records the confirmation in the browser localStorage so it is not shown again on later visits. Until the visitor confirms, the rest of :App: is covered by the overlay and is not interactive.
+
+  ***acceptance tests***
+
+  - On a first visit with empty localStorage, an age-verification overlay is visible and contains text stating the visitor must be 18 or older.
+
+  - Clicking the "Enter" button on the age-verification overlay removes the overlay so the page content behind it becomes visible.
+
+  - The header displays the "Vivost" logo and an amber "Post an ad" button.
+
+  - The footer displays a statement indicating the site is for adults aged 18 and over.
+
+- Create the placeholder data layer as :PlaceholderData: in TypeScript modules under "src/data".
+
+    - Create "src/data/categories.ts" exporting the four standard :Category: records ("Escorts", "Massage", "Companionship", "Virtual"), each with a url slug, a display name, and a short description.
+
+    - Create "src/data/profiles.ts" exporting at least eighteen :Profile: records spread across all four categories. Each record has a unique id, a placeholder name such as "Profile 1", a category slug, a placeholder city location, a numeric placeholder hourly rate, an availability label, a placeholder image colour string used to render a solid colour block, a non-explicit lorem-ipsum description, and three or four attribute label and value pairs.
+
+    - Provide helper functions in "src/data": getAllProfiles(), getProfileById(id), getProfilesByCategory(slug), a filterProfiles() function that filters by an optional category slug, location text, and maximum rate, and a sortProfiles() function that sorts by rate ascending or descending.
+
+    - Add a short code comment in each data module noting that these modules are the single place to replace with a real database later.
+
+- Build the home page at "/".
+
+    - A hero section at the top contains a search panel with a keyword text input, a :Category: dropdown populated from the categories in :PlaceholderData:, a location text input, and an amber "Search" button. Submitting the search navigates to "/search" passing the keyword, category, and location as URL query parameters.
+
+    - Below the hero, show a row of :Category: tiles, one for each :Category:, each linking to "/search" filtered by that category slug.
+
+    - Below the tiles, show a "Featured" heading and a responsive grid of :Profile: cards built from the first eight records in :PlaceholderData:. Each card shows the solid-colour image block, the profile name, its :Category:, its location, and its rate, and the whole card links to that profile's "/profile/:id" page.
+
+  ***acceptance tests***
+
+  - The home page shows a search panel containing a category dropdown and a "Search" button.
+
+  - The home page shows a tile for each of the four standard categories.
+
+  - The home page shows at least eight profile cards in the featured grid.
+
+  - Clicking a featured profile card navigates the browser to a URL beginning with "/profile/".
+
+- Build the search-results page at "/search".
+
+    - The page uses a two-column layout with a filter sidebar on the left and a results area on the right. On narrow screens the sidebar stacks above the results.
+
+    - The filter sidebar contains :Category: filter options, a location text filter, a maximum-rate control, and a sort control offering "Rate: low to high" and "Rate: high to low".
+
+    - When the page loads it reads any "keyword", "category", and "location" values from the URL query parameters and applies them as the initial filters, using the filterProfiles() and sortProfiles() helpers against :PlaceholderData:.
+
+    - The results area shows a heading with the number of matching profiles and a responsive grid of :Profile: cards identical in shape to the home-page cards, each linking to its "/profile/:id" page. Changing a filter updates the visible cards and the count without a full page reload.
+
+  ***acceptance tests***
+
+  - Visiting "/search" shows a filter sidebar and a grid of profile cards.
+
+  - The results area shows a text count of the number of matching profiles.
+
+  - Selecting a single category in the filter sidebar reduces the visible cards to that category only.
+
+  - A profile card on the results page links to a URL beginning with "/profile/".
+
+- Build the profile-detail page at "/profile/:id".
+
+    - Look up the :Profile: by its id in :PlaceholderData:. If no profile matches, show a simple "Listing not found" message.
+
+    - The page shows a breadcrumb, a gallery area made of several solid-colour image blocks, and a header with the profile name, :Category:, location, and rate.
+
+    - The page shows the profile description and an attributes list rendering each attribute label and value pair.
+
+    - A contact panel on the side contains a "Show contact details" placeholder button and a "Report this listing" button that opens a small confirmation message when clicked.
+
+    - Below the details, a "Similar profiles" section shows up to four other :Profile: cards from the same :Category:.
+
+  ***acceptance tests***
+
+  - Visiting the detail page for a valid profile id shows that profile's name and its description.
+
+  - The detail page shows an attributes list with at least one label and value pair.
+
+  - The detail page shows a "Report this listing" button.
+
+  - The detail page shows a "Similar profiles" section containing at least one additional profile card.
+
+- Wire the pages together and finalise the responsive booking-style design across :App:.
+
+    - Submitting the home-page search navigates to "/search" and the results reflect the submitted keyword, category, and location.
+
+    - Each :Category: link in the :Header: and each home-page :Category: tile navigates to "/search" filtered by that category.
+
+    - Ensure the booking-style theme is applied consistently across the home, search, and profile pages, including cards, buttons, :Header:, and :Footer:.
+
+    - Ensure the layout is responsive: the search-results page collapses to a single column on narrow viewports, profile-card grids reflow to fewer columns, and the page does not overflow horizontally on a 375-pixel-wide viewport.
+
+  ***acceptance tests***
+
+  - Submitting the home-page search navigates to a "/search" URL and shows a grid of profile cards.
+
+  - Clicking a category link in the header navigates to a "/search" URL showing profile cards.
+
+  - On a 375-pixel-wide viewport the home page does not scroll horizontally.
+
+  - The profile-detail page for a valid id continues to show the profile name after navigating to it from the search results.
