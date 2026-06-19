@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { CATEGORIES } from '../data/categories';
 import { filterProfiles, sortProfiles, FilterOptions } from '../data/index';
@@ -16,6 +16,17 @@ const SearchResults: React.FC = () => {
   });
 
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+
+  // Re-sync filters when the URL query changes (e.g. clicking a header category
+  // link while already on /search keeps the same route and does not remount).
+  useEffect(() => {
+    setFilters({
+      categorySlug: searchParams.get('category') || '',
+      location: searchParams.get('location') || '',
+      keyword: searchParams.get('keyword') || searchParams.get('q') || '',
+      maxRate: searchParams.get('maxRate') ? parseInt(searchParams.get('maxRate')!) : undefined
+    });
+  }, [searchParams]);
 
   const filteredAndSortedProfiles = useMemo(() => {
     try {
@@ -48,8 +59,9 @@ const SearchResults: React.FC = () => {
           <h3>Filters</h3>
           
           <div className="filter-group">
-            <label>Category</label>
-            <select 
+            <label htmlFor="filter-category">Category</label>
+            <select
+              id="filter-category"
               className="filter-input"
               value={filters.categorySlug || ''}
               onChange={(e) => updateFilter('categorySlug', e.target.value)}
@@ -62,9 +74,10 @@ const SearchResults: React.FC = () => {
           </div>
 
           <div className="filter-group">
-            <label>Location</label>
-            <input 
-              type="text" 
+            <label htmlFor="filter-location">Location</label>
+            <input
+              id="filter-location"
+              type="text"
               className="filter-input"
               placeholder="Filter by city..."
               value={filters.location || ''}
@@ -73,9 +86,10 @@ const SearchResults: React.FC = () => {
           </div>
 
           <div className="filter-group">
-            <label>Max Hourly Rate (£)</label>
-            <input 
-              type="number" 
+            <label htmlFor="filter-maxrate">Max Hourly Rate (£)</label>
+            <input
+              id="filter-maxrate"
+              type="number"
               className="filter-input"
               value={filters.maxRate || ''}
               onChange={(e) => updateFilter('maxRate', e.target.value ? parseInt(e.target.value) : undefined)}
@@ -83,8 +97,9 @@ const SearchResults: React.FC = () => {
           </div>
 
           <div className="filter-group">
-            <label>Sort By</label>
-            <select 
+            <label htmlFor="filter-sort">Sort By</label>
+            <select
+              id="filter-sort"
               className="filter-input"
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}

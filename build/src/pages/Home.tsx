@@ -24,16 +24,18 @@ const Home: React.FC = () => {
       {/* Hero Section */}
       <section className="hero-section card">
         <h1 style={{ marginTop: 0 }}>Find your ideal service provider</h1>
-        <form onSubmit={handleSearch} className="search-panel">
-          <input 
-            type="text" 
-            placeholder="Keyword (e.g. Friendly)" 
+        <form onSubmit={handleSearch} className="search-panel" aria-label="Search providers">
+          <input
+            type="text"
+            placeholder="Keyword (e.g. Friendly)"
+            aria-label="Keyword"
             className="search-input"
             value={search.keyword}
             onChange={(e) => setSearch({...search, keyword: e.target.value})}
           />
-          <select 
+          <select
             className="search-input"
+            aria-label="Category"
             value={search.category}
             onChange={(e) => setSearch({...search, category: e.target.value})}
           >
@@ -42,9 +44,10 @@ const Home: React.FC = () => {
               <option key={cat.id} value={cat.slug}>{cat.name}</option>
             ))}
           </select>
-          <input 
-            type="text" 
-            placeholder="Location" 
+          <input
+            type="text"
+            placeholder="Location"
+            aria-label="Location"
             className="search-input"
             value={search.location}
             onChange={(e) => setSearch({...search, location: e.target.value})}
