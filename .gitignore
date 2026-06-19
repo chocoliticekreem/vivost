@@ -1,0 +1,12 @@
+# Codeplain CLI (cloned third-party repo, has its own git history)
+plain2code_client/
+
+# Codeplain generated output
+build/
+dist/
+plain_modules/
+conformance_tests/
+
+# Logs / env
+*.log
+.env
