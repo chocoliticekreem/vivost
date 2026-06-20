@@ -25,6 +25,22 @@ export class ModerationService {
     senderRole: "worker" | "customer";
     body: string;
   }): Promise<InlineResult> {
+    const result = this.evaluateInline(input);
+    await this.commitInline(result.verdict);
+    return result;
+  }
+
+  /**
+   * Pure Tier-1 evaluation: builds the verdict and the (possibly redacted) body
+   * WITHOUT persisting or publishing. The verdict's message_id is a foreign key,
+   * so the caller must save the message row first, then call commitInline().
+   */
+  evaluateInline(input: {
+    messageId: UUID;
+    conversationId: UUID;
+    senderRole: "worker" | "customer";
+    body: string;
+  }): InlineResult {
     const t1 = screenTier1(input.body);
     const now = this.clock.now();
     const needsReview =
@@ -48,20 +64,25 @@ export class ModerationService {
       createdAt: now,
       updatedAt: now,
     };
+    return { verdict, redactedBody: t1.redactedBody };
+  }
 
-    if (t1.action === "escalate") {
+  /**
+   * Persists a Tier-1 verdict and raises a safety escalation when required.
+   * Call only after the referenced message row exists (FK on message_id).
+   */
+  async commitInline(verdict: ModerationVerdict): Promise<void> {
+    if (verdict.action === "escalate") {
       await this.eventBus.publish({
         type: "moderation.safety_escalation",
         payload: {
-          messageId: input.messageId,
-          conversationId: input.conversationId,
-          categories: t1.categories,
+          messageId: verdict.messageId,
+          conversationId: verdict.conversationId,
+          categories: verdict.categories,
         },
       });
     }
-
     await this.repo.save(verdict);
-    return { verdict, redactedBody: t1.redactedBody };
   }
 
   async screenDeep(input: {

@@ -61,7 +61,7 @@ export class MessagingService {
     const messageId = newId();
     const now = this.clock.now();
 
-    const inline = await this.moderation.screenInline({
+    const evaluation = this.moderation.evaluateInline({
       messageId,
       conversationId: input.conversationId,
       senderRole: parsed.senderRole,
@@ -71,10 +71,10 @@ export class MessagingService {
     let status: MessageStatus;
     let body: string;
     let originalBody: string | null;
-    switch (inline.verdict.action) {
+    switch (evaluation.verdict.action) {
       case "redact":
         status = "redacted";
-        body = inline.redactedBody;
+        body = evaluation.redactedBody;
         originalBody = parsed.body;
         break;
       case "hold":
@@ -105,6 +105,9 @@ export class MessagingService {
       updatedAt: now,
     };
     const saved = await this.messages.save(message);
+
+    // The verdict's message_id is a FK to the row we just saved — persist it now.
+    await this.moderation.commitInline(evaluation.verdict);
 
     await this.conversations.save({ ...conversation, updatedAt: now });
 
