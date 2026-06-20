@@ -39,9 +39,9 @@ const ProfileDetail: React.FC = () => {
       <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
         {/* Breadcrumb */}
         <nav style={{ marginBottom: '20px', fontSize: '14px' }}>
-          <Link to="/" style={{ color: '#666', textDecoration: 'none' }}>Home</Link>
+          <Link to="/" style={{ color: 'var(--text-3)', textDecoration: 'none' }}>Home</Link>
           <span style={{ margin: '0 8px' }}>&gt;</span>
-          <Link to={`/search?category=${profile.categorySlug}`} style={{ color: '#666', textDecoration: 'none', textTransform: 'capitalize' }}>
+          <Link to={`/search?category=${profile.categorySlug}`} style={{ color: 'var(--text-3)', textDecoration: 'none', textTransform: 'capitalize' }}>
             {profile.categorySlug}
           </Link>
           <span style={{ margin: '0 8px' }}>&gt;</span>
@@ -95,33 +95,33 @@ const ProfileDetail: React.FC = () => {
             )}
 
             <div className="card" style={{ marginBottom: '20px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #eee', paddingBottom: '15px', marginBottom: '15px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--glass-border)', paddingBottom: '15px', marginBottom: '15px' }}>
                 <div>
                   <h1 style={{ margin: '0', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                     {profile.name}
                     {profile.verified && (
-                      <span style={{ background: 'rgba(20,120,80,0.12)', color: '#147850', fontSize: '13px', fontWeight: 700, padding: '4px 10px', borderRadius: '999px' }}>✓ ID Verified</span>
+                      <span style={{ background: 'rgba(61,220,154,0.16)', color: 'var(--good)', fontSize: '13px', fontWeight: 700, padding: '4px 10px', borderRadius: '999px' }}>✓ ID Verified</span>
                     )}
                   </h1>
-                  <p style={{ margin: '5px 0 0 0', color: '#666' }}>
+                  <p style={{ margin: '5px 0 0 0', color: 'var(--text-2)' }}>
                     {(profile.area ? `${profile.area}, ` : '') + profile.location} • {profile.categorySlug.toUpperCase()}
                   </p>
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--color-header-bg)' }}>£{profile.hourlyRate}</div>
-                  <div style={{ fontSize: '14px', color: '#888' }}>per hour</div>
+                  <div style={{ fontSize: '14px', color: 'var(--text-3)' }}>per hour</div>
                 </div>
               </div>
 
               <h3>About</h3>
-              <p style={{ lineHeight: '1.6', color: '#444' }}>{profile.description}</p>
+              <p style={{ lineHeight: '1.6', color: 'var(--text-2)' }}>{profile.description}</p>
 
               <h3 style={{ marginTop: '30px' }}>Details</h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '15px' }}>
                 {profile.attributes.map((attr, idx) => (
-                  <div key={idx} style={{ padding: '10px', background: '#f9f9f9', borderRadius: '4px' }}>
-                    <span style={{ fontSize: '12px', color: '#888', display: 'block', textTransform: 'uppercase' }}>{attr.label}</span>
-                    <span style={{ fontWeight: '640' }}>{attr.value}</span>
+                  <div key={idx} style={{ padding: '10px', background: 'var(--glass-bg-soft)', border: '1px solid var(--glass-border)', borderRadius: '4px' }}>
+                    <span style={{ fontSize: '12px', color: 'var(--text-3)', display: 'block', textTransform: 'uppercase' }}>{attr.label}</span>
+                    <span style={{ fontWeight: '640', color: 'var(--text-1)' }}>{attr.value}</span>
                   </div>
                 ))}
               </div>
@@ -131,7 +131,7 @@ const ProfileDetail: React.FC = () => {
                   <h3 style={{ marginTop: '30px' }}>Services</h3>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                     {profile.services.map((svc, idx) => (
-                      <span key={idx} style={{ background: '#f0f0f5', borderRadius: '999px', padding: '5px 12px', fontSize: '13px', color: '#444' }}>{svc}</span>
+                      <span key={idx} style={{ background: 'var(--glass-bg-soft)', border: '1px solid var(--glass-border)', borderRadius: '999px', padding: '5px 12px', fontSize: '13px', color: 'var(--text-2)' }}>{svc}</span>
                     ))}
                   </div>
                 </>
@@ -163,18 +163,18 @@ const ProfileDetail: React.FC = () => {
 
               <button
                 onClick={() => setShowReportForm(v => !v)}
-                style={{ width: '100%', background: 'none', border: '1px solid #ddd', padding: '10px', borderRadius: '4px', cursor: 'pointer' }}
+                style={{ width: '100%', background: 'none', border: '1px solid var(--glass-border)', padding: '10px', borderRadius: '4px', cursor: 'pointer' }}
               >
                 Report this listing
               </button>
 
               {showReportForm && !showReportConfirm && (
-                <div style={{ marginTop: '15px', padding: '12px', border: '1px solid #eee', borderRadius: '4px', fontSize: '13px' }}>
+                <div style={{ marginTop: '15px', padding: '12px', border: '1px solid var(--glass-border)', borderRadius: '4px', fontSize: '13px' }}>
                   <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '6px' }}>Why are you reporting this listing?</label>
                   <select
                     value={reportReason}
                     onChange={e => setReportReason(e.target.value)}
-                    style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px', marginBottom: '10px', boxSizing: 'border-box' }}
+                    style={{ width: '100%', padding: '8px', border: '1px solid var(--glass-border)', borderRadius: '4px', marginBottom: '10px', boxSizing: 'border-box' }}
                   >
                     <option value="">Select a reason…</option>
                     <option value="underage">May involve someone under 18</option>
@@ -191,7 +191,7 @@ const ProfileDetail: React.FC = () => {
                   >
                     Submit report
                   </button>
-                  <p style={{ marginTop: '10px', marginBottom: 0, color: '#666' }}>
+                  <p style={{ marginTop: '10px', marginBottom: 0, color: 'var(--text-2)' }}>
                     Someone in immediate danger? Call 999. Suspect trafficking?{' '}
                     <Link to="/safety">Safety &amp; Reporting</Link>.
                   </p>
@@ -199,17 +199,17 @@ const ProfileDetail: React.FC = () => {
               )}
 
               {showReportConfirm && (
-                <div style={{ marginTop: '15px', padding: '10px', backgroundColor: '#fff4f4', border: '1px solid #ffcdd2', borderRadius: '4px', fontSize: '13px' }}>
+                <div style={{ marginTop: '15px', padding: '10px', backgroundColor: 'rgba(255,61,127,0.12)', border: '1px solid rgba(255,61,127,0.35)', borderRadius: '4px', fontSize: '13px', color: 'var(--text-1)' }}>
                   <strong>Report received.</strong> Thank you for helping keep our community safe. We review reports and remove illegal content promptly.
                 </div>
               )}
 
-              <div style={{ marginTop: '20px', fontSize: '13px', color: '#666' }}>
+              <div style={{ marginTop: '20px', fontSize: '13px', color: 'var(--text-2)' }}>
                 <p>Availability: <strong>{profile.availability}</strong></p>
-                {profile.verified && <p style={{ color: '#147850' }}>✓ ID Verified advertiser</p>}
+                {profile.verified && <p style={{ color: 'var(--good)' }}>✓ ID Verified advertiser</p>}
                 {profile.sourceUrl && (
-                  <p style={{ fontSize: '12px', color: '#999' }}>
-                    <a href={profile.sourceUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#999' }}>Original listing ↗</a>
+                  <p style={{ fontSize: '12px', color: 'var(--text-3)' }}>
+                    <a href={profile.sourceUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-3)' }}>Original listing ↗</a>
                   </p>
                 )}
               </div>

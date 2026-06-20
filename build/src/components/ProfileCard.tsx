@@ -12,50 +12,42 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ profile }) => {
     const locationLabel = profile.area ? `${profile.area}, ${profile.location}` : profile.location;
     return (
       <Link to={`/profile/${profile.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-        <div className="card profile-card">
-          <div
-            style={{
-              position: 'relative',
-              height: '200px',
-              borderRadius: 'calc(var(--border-radius) - 4px)',
-              marginBottom: '12px',
-              overflow: 'hidden',
-              backgroundColor: profile.imageColor,
-            }}
-          >
+        <article className="profile-card">
+          <div className="profile-media" style={{ backgroundColor: profile.imageColor }}>
             {cover && (
               <img
                 src={cover}
                 alt={profile.name}
                 loading="lazy"
-                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                 onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
               />
             )}
-            {profile.verified && (
-              <span
-                style={{
-                  position: 'absolute', top: '8px', left: '8px',
-                  background: 'rgba(20,120,80,0.92)', color: '#fff',
-                  fontSize: '11px', fontWeight: 700, padding: '3px 8px',
-                  borderRadius: '999px', letterSpacing: '0.02em',
-                }}
-              >
-                ✓ ID Verified
+            <div className="profile-scrim" />
+
+            <div className="profile-topbar">
+              <span className="badge badge-glass">
+                <span className="online-dot" /> Online
               </span>
-            )}
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div style={{ minWidth: 0 }}>
-              <h3 style={{ margin: '0 0 4px 0', fontSize: '18px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{profile.name}</h3>
-              <p style={{ margin: '0', fontSize: '14px', color: '#666' }}>{profile.categorySlug.toUpperCase()} • {locationLabel}</p>
+              {profile.verified && <span className="badge badge-verified">✓ Verified</span>}
             </div>
-            <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: '8px' }}>
-              <span style={{ fontWeight: 'bold', color: 'var(--color-header-bg)' }}>£{profile.hourlyRate}</span>
-              <span style={{ fontSize: '12px', display: 'block', color: '#888' }}>per hour</span>
+
+            <div className="profile-info">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '8px' }}>
+                <div style={{ minWidth: 0 }}>
+                  <h3 style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{profile.name}</h3>
+                  <p className="meta" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {profile.categorySlug.toUpperCase()} • {locationLabel}
+                  </p>
+                </div>
+                <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                  <span className="rate">£{profile.hourlyRate}</span>
+                  <br />
+                  <small style={{ color: 'rgba(255,255,255,0.6)', fontSize: '11px' }}>per hour</small>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </article>
       </Link>
     );
   } catch (error) {

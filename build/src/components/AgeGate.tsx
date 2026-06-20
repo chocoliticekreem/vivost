@@ -39,7 +39,9 @@ const AgeGate: React.FC = () => {
   const overlayStyle: React.CSSProperties = {
     position: 'fixed',
     top: 0, left: 0, right: 0, bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.9)',
+    backgroundColor: 'rgba(0,0,0,0.82)',
+    WebkitBackdropFilter: 'blur(8px)',
+    backdropFilter: 'blur(8px)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -53,7 +55,7 @@ const AgeGate: React.FC = () => {
     <div style={overlayStyle}>
       <div
         className="card"
-        style={{ color: '#333', maxWidth: '400px' }}
+        style={{ color: 'var(--text-1)', maxWidth: '400px' }}
         role="dialog"
         aria-modal="true"
         aria-labelledby="age-gate-title"
@@ -65,13 +67,13 @@ const AgeGate: React.FC = () => {
         <div style={{ marginTop: '20px', display: 'flex', gap: '10px', justifyContent: 'center' }}>
           <button ref={enterButtonRef} className="btn-amber" onClick={handleConfirm}>I am 18 or older — Enter</button>
           <button 
-            style={{ padding: '8px 16px', borderRadius: '4px', border: '1px solid #ccc' }}
+            style={{ padding: '8px 16px', borderRadius: '4px', border: '1px solid var(--glass-border)', color: 'var(--text-2)', background: 'transparent' }}
             onClick={() => window.location.href = 'https://www.google.com'}
           >
             Leave
           </button>
         </div>
-        <p style={{ fontSize: '11px', color: '#888', marginTop: '16px', marginBottom: 0 }}>
+        <p style={{ fontSize: '11px', color: 'var(--text-3)', marginTop: '16px', marginBottom: 0 }}>
           By entering you confirm you are 18+ and agree to our{' '}
           <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.
         </p>

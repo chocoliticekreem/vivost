@@ -23,7 +23,12 @@ const Home: React.FC = () => {
     <div className="home-container">
       {/* Hero Section */}
       <section className="hero-section card">
-        <h1 style={{ marginTop: 0 }}>Find your ideal service provider</h1>
+        <h1 style={{ marginTop: 0, fontSize: 'clamp(30px, 5vw, 48px)', fontWeight: 800, lineHeight: 1.1 }}>
+          Find your perfect <span className="gradient-text">companion</span>
+        </h1>
+        <p style={{ color: 'var(--text-2)', fontSize: '16px', maxWidth: '560px', margin: '12px auto 0' }}>
+          Browse verified listings near you. Discreet, secure, and strictly 18+.
+        </p>
         <form onSubmit={handleSearch} className="search-panel" aria-label="Search providers">
           <input
             type="text"
@@ -52,7 +57,7 @@ const Home: React.FC = () => {
             value={search.location}
             onChange={(e) => setSearch({...search, location: e.target.value})}
           />
-          <button type="submit" className="btn-amber" style={{ height: '45px' }}>Search</button>
+          <button type="submit" className="btn-amber" style={{ height: '48px', padding: '0 28px' }}>Search</button>
         </form>
       </section>
 
