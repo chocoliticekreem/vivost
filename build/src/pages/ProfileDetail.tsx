@@ -2,13 +2,14 @@ import React, { useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getProfileById, getProfilesByCategory } from '../data';
 import ProfileCard from '../components/ProfileCard';
+import ChatPanel from '../components/ChatPanel';
 
 const ProfileDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [showReportForm, setShowReportForm] = useState(false);
   const [showReportConfirm, setShowReportConfirm] = useState(false);
   const [reportReason, setReportReason] = useState('');
-  const [showContact, setShowContact] = useState(false);
+  const [showChat, setShowChat] = useState(false);
 
   const profile = useMemo(() => (id ? getProfileById(id) : undefined), [id]);
   
@@ -144,22 +145,10 @@ const ProfileDetail: React.FC = () => {
               <button
                 className="btn-amber"
                 style={{ width: '100%', padding: '15px', fontSize: '16px', marginBottom: '10px' }}
-                onClick={() => setShowContact(!showContact)}
-                disabled={!profile.phone}
+                onClick={() => setShowChat(true)}
               >
-                {profile.phone
-                  ? (showContact ? profile.phone : 'Show contact details')
-                  : 'No contact number listed'}
+                Message {profile.name}
               </button>
-
-              {showContact && profile.phone && (
-                <a
-                  href={`tel:${profile.phone}`}
-                  style={{ display: 'block', textAlign: 'center', textDecoration: 'none', color: 'var(--color-header-bg)', fontSize: '14px', marginBottom: '10px' }}
-                >
-                  Tap to call
-                </a>
-              )}
 
               <button
                 onClick={() => setShowReportForm(v => !v)}
@@ -226,6 +215,14 @@ const ProfileDetail: React.FC = () => {
               ))}
             </div>
           </div>
+        )}
+
+        {showChat && (
+          <ChatPanel
+            workerRef={profile.id}
+            workerName={profile.name}
+            onClose={() => setShowChat(false)}
+          />
         )}
       </div>
     );

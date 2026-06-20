@@ -32,6 +32,22 @@ describe("ClientsService.register", () => {
   });
 });
 
+describe("ClientsService.ensureByEmail", () => {
+  it("creates a client when none exists", async () => {
+    const { service } = makeService();
+    const client = await service.ensureByEmail("New@Example.com");
+    expect(client.email).toBe("new@example.com");
+    expect(client.id).toBeTruthy();
+  });
+
+  it("returns the same client when one already exists (no duplicate)", async () => {
+    const { service } = makeService();
+    const first = await service.ensureByEmail("dupe@example.com");
+    const second = await service.ensureByEmail("DUPE@example.com");
+    expect(second.id).toBe(first.id);
+  });
+});
+
 describe("ClientsService.getById", () => {
   it("throws NotFoundError when missing", async () => {
     const { service } = makeService();

@@ -30,6 +30,17 @@ export class ClientsService {
     return this.repo.save(client);
   }
 
+  /**
+   * Idempotent get-or-create by email. Returns the existing client when one
+   * already exists for the (normalised) email, otherwise registers a new one.
+   */
+  async ensureByEmail(email: string): Promise<Client> {
+    const normalisedEmail = normaliseEmail(email);
+    const existing = await this.repo.findByEmail(normalisedEmail);
+    if (existing) return existing;
+    return this.register({ email: normalisedEmail });
+  }
+
   async getById(id: UUID): Promise<Client> {
     const client = await this.repo.getById(id);
     if (!client) {

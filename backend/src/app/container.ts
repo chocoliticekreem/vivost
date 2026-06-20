@@ -3,6 +3,7 @@ import { systemClock, sha256Hasher } from "../core";
 import {
   fakePaymentProvider,
   fakeIdVerificationProvider,
+  fakeModerationProvider,
   inMemoryEventBus,
 } from "../core/testing";
 
@@ -58,10 +59,23 @@ import {
   PgReferralRepository,
   PgRewardLedgerRepository,
 } from "../referrals";
+import {
+  ModerationService,
+  InMemoryModerationRepository,
+  PgModerationRepository,
+} from "../moderation";
+import {
+  MessagingService,
+  InMemoryConversationRepository,
+  InMemoryMessageRepository,
+  PgConversationRepository,
+  PgMessageRepository,
+} from "../messaging";
 
 import {
   placeholderPaymentProvider,
   placeholderIdVerificationProvider,
+  productionModerationProvider,
   inProcessEventBus,
 } from "./providers";
 
@@ -90,6 +104,8 @@ export interface Container {
   reviewsService: ReviewsService;
   analyticsService: AnalyticsService;
   referralsService: ReferralsService;
+  moderationService: ModerationService;
+  messagingService: MessagingService;
   clock: Clock;
 }
 
@@ -108,6 +124,20 @@ export function createInMemoryContainer(opts?: { clock?: Clock }): Container {
   const plansService = new PlansService(plansRepo);
   const geoRepo = new InMemoryGeoRepository();
   const geoService = new GeoService(geoRepo);
+
+  const moderationService = new ModerationService(
+    new InMemoryModerationRepository(),
+    fakeModerationProvider(),
+    clock,
+    eventBus,
+  );
+  const messagingService = new MessagingService(
+    new InMemoryConversationRepository(),
+    new InMemoryMessageRepository(),
+    moderationService,
+    clock,
+    eventBus,
+  );
 
   const container: Container = {
     accountsService: new AccountsService(new InMemoryAccountsRepository(), clock),
@@ -155,11 +185,17 @@ export function createInMemoryContainer(opts?: { clock?: Clock }): Container {
       new InMemoryRewardLedgerRepository(),
       clock,
     ),
+    moderationService,
+    messagingService,
     clock,
   };
 
   void plansService.seed();
   void geoService.seed();
+
+  eventBus.subscribe("message.sent", (p) => {
+    void container.moderationService.screenDeep(p as any);
+  });
 
   return container;
 }
@@ -176,7 +212,21 @@ export function createPgContainer(db: Db, opts?: { clock?: Clock }): Container {
 
   const plansRepo = new PgPlansRepository(db);
 
-  return {
+  const moderationService = new ModerationService(
+    new PgModerationRepository(db),
+    productionModerationProvider(),
+    clock,
+    eventBus,
+  );
+  const messagingService = new MessagingService(
+    new PgConversationRepository(db),
+    new PgMessageRepository(db),
+    moderationService,
+    clock,
+    eventBus,
+  );
+
+  const container: Container = {
     accountsService: new AccountsService(new PgAccountsRepository(db), clock),
     listingsService: new ListingsService(new PgListingsRepository(db), clock),
     plansService: new PlansService(plansRepo),
@@ -218,6 +268,14 @@ export function createPgContainer(db: Db, opts?: { clock?: Clock }): Container {
       new PgRewardLedgerRepository(db),
       clock,
     ),
+    moderationService,
+    messagingService,
     clock,
   };
+
+  eventBus.subscribe("message.sent", (p) => {
+    void container.moderationService.screenDeep(p as any);
+  });
+
+  return container;
 }

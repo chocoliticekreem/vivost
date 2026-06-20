@@ -6,7 +6,11 @@ import {
 } from "../core";
 import type { Clock, UUID } from "../core";
 import { registerAccountSchema } from "./types";
-import type { Account, RegisterAccountInput } from "./types";
+import type {
+  Account,
+  AccountRole,
+  RegisterAccountInput,
+} from "./types";
 import type { AccountsRepository } from "./accountsRepository";
 
 export class AccountsService {
@@ -34,6 +38,20 @@ export class AccountsService {
       updatedAt: now,
     };
     return this.repo.save(account);
+  }
+
+  /**
+   * Idempotent get-or-create by email. Returns the existing account when one
+   * already exists for the (normalised) email, otherwise registers a new one.
+   */
+  async ensureByEmail(
+    email: string,
+    role: AccountRole = "advertiser",
+  ): Promise<Account> {
+    const normalisedEmail = normaliseEmail(email);
+    const existing = await this.repo.findByEmail(normalisedEmail);
+    if (existing) return existing;
+    return this.register({ email: normalisedEmail, role });
   }
 
   async getById(id: UUID): Promise<Account> {

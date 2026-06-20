@@ -48,3 +48,36 @@ export interface EventBus {
   publish(event: { type: string; payload: unknown }): Promise<void>;
   subscribe(type: string, handler: (payload: unknown) => void): void;
 }
+
+export type ModerationCategory =
+  | "financial_scam"
+  | "off_platform"
+  | "harassment"
+  | "safety_legal";
+
+export type ModerationAction =
+  | "allow" // deliver unchanged
+  | "redact" // deliver with matched spans masked
+  | "hold" // do not deliver; queue for review
+  | "block" // do not deliver; hard stop
+  | "flag" // deliver, but record for review
+  | "escalate"; // deliver, raise a safety escalation (never auto-block)
+
+/**
+ * AI moderation port. Tier-2 nuanced analysis lives behind this interface so the
+ * real LLM call is swappable and no API keys live in the domain. context is the
+ * recent conversation (oldest→newest) for trajectory-aware judgement.
+ */
+export interface ModerationProvider {
+  analyze(input: {
+    body: string;
+    context: { senderRole: "worker" | "customer"; body: string }[];
+    focus: ModerationCategory[];
+  }): Promise<{
+    flagged: boolean;
+    categories: ModerationCategory[];
+    score: number; // 0..1
+    action: ModerationAction;
+    reason: string;
+  }>;
+}
