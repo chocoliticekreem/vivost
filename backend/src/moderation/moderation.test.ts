@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 import { NotFoundError, fixedClock, newId } from "../core";
 import { fakeModerationProvider, inMemoryEventBus } from "../core/testing";
+import type {
+  ModerationAction,
+  ModerationCategory,
+  ModerationProvider,
+} from "../core";
 import { ModerationService } from "./moderationService";
 import { InMemoryModerationRepository } from "./inMemoryModerationRepository";
 import { screenTier1 } from "./tier1";
@@ -27,6 +32,43 @@ function inlineInput(body: string) {
     body,
   };
 }
+
+describe("screenDeep sanitises LLM output", () => {
+  it("clamps an out-of-range score and coerces an invalid action/category", async () => {
+    const repo = new InMemoryModerationRepository();
+    const wildProvider: ModerationProvider = {
+      analyze: async () => ({
+        flagged: true,
+        categories: ["financial_scam", "totally_made_up"] as unknown as ModerationCategory[],
+        score: 95,
+        action: "nuke" as unknown as ModerationAction,
+        reason: "wild model output",
+      }),
+    };
+    const service = new ModerationService(
+      repo,
+      wildProvider,
+      fixedClock(NOW),
+      inMemoryEventBus(),
+    );
+    const messageId = newId();
+    await service.screenDeep({
+      messageId,
+      conversationId: newId(),
+      senderRole: "customer",
+      body: "anything",
+      context: [],
+    });
+
+    const verdicts = await repo.listByMessage(messageId);
+    expect(verdicts).toHaveLength(1);
+    const v = verdicts[0]!;
+    expect(v.score).toBeLessThanOrEqual(1);
+    expect(v.score).toBeGreaterThanOrEqual(0);
+    expect(["allow", "redact", "hold", "block", "flag", "escalate"]).toContain(v.action);
+    expect(v.categories).toEqual(["financial_scam"]);
+  });
+});
 
 describe("screenTier1", () => {
   it("redacts a phone number and masks it in redactedBody", () => {

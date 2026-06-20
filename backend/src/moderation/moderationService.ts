@@ -1,5 +1,12 @@
 import { NotFoundError, newId } from "../core";
-import type { Clock, EventBus, ModerationProvider, UUID } from "../core";
+import type {
+  Clock,
+  EventBus,
+  ModerationAction,
+  ModerationCategory,
+  ModerationProvider,
+  UUID,
+} from "../core";
 import { screenTier1 } from "./tier1";
 import type { InlineResult, ModerationVerdict } from "./types";
 import type { ModerationRepository } from "./moderationRepository";
@@ -9,6 +16,15 @@ const ALL_CATEGORIES = [
   "off_platform",
   "harassment",
   "safety_legal",
+] as const;
+
+const ALL_ACTIONS = [
+  "allow",
+  "redact",
+  "hold",
+  "block",
+  "flag",
+  "escalate",
 ] as const;
 
 export class ModerationService {
@@ -100,15 +116,28 @@ export class ModerationService {
     if (!r.flagged) return;
 
     const now = this.clock.now();
+    // Sanitise LLM output before persisting: score must fit numeric(4,3) (0..1),
+    // action must satisfy the CHECK constraint, categories the known set.
+    const score = Math.max(
+      0,
+      Math.min(1, typeof r.score === "number" && Number.isFinite(r.score) ? r.score : 0),
+    );
+    const action: ModerationAction = (ALL_ACTIONS as readonly string[]).includes(r.action)
+      ? r.action
+      : "flag";
+    const categories = (Array.isArray(r.categories) ? r.categories : []).filter(
+      (c): c is ModerationCategory => (ALL_CATEGORIES as readonly string[]).includes(c),
+    );
+
     const verdict: ModerationVerdict = {
       id: newId(),
       messageId: input.messageId,
       conversationId: input.conversationId,
       tier: 2,
-      categories: r.categories,
-      score: r.score,
-      action: r.action,
-      reason: r.reason,
+      categories,
+      score,
+      action,
+      reason: typeof r.reason === "string" ? r.reason : "",
       excerpt: null,
       needsReview: true,
       reviewStatus: "open",
@@ -116,13 +145,13 @@ export class ModerationService {
       updatedAt: now,
     };
 
-    if (r.categories.includes("safety_legal")) {
+    if (categories.includes("safety_legal")) {
       await this.eventBus.publish({
         type: "moderation.safety_escalation",
         payload: {
           messageId: input.messageId,
           conversationId: input.conversationId,
-          categories: r.categories,
+          categories,
         },
       });
     }
