@@ -9,7 +9,7 @@
  * (env / DefinePlugin) is a follow-up.
  */
 
-const API_BASE = 'http://localhost:8787';
+export const API_BASE = 'http://localhost:8787';
 
 const CUSTOMER_EMAIL_KEY = 'vivost-customer-email';
 const CONVO_KEY_PREFIX = 'vivost-convo-';

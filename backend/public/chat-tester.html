@@ -281,7 +281,18 @@ $("#reset-btn").onclick=()=>{ setup().then(()=>toast("Fresh conversation")); };
 
 (async function init(){
   await detectMode();
-  try{ await setup(); }catch(e){ $("#mode-meta").textContent="setup failed: "+e.message; toast("Setup failed: "+e.message); }
+  const urlConv = new URLSearchParams(location.search).get("conversationId");
+  if (urlConv) {
+    // Join an existing conversation (e.g. one started from the platform profile chat)
+    convId = urlConv;
+    $("#mode-meta").textContent = "joined platform conversation — reply as Worker";
+    $("#ids-meta").innerHTML = `conv <code>${convId.slice(0,8)}</code>`;
+    document.querySelectorAll(".stream").forEach(s=>s.innerHTML="");
+    lastSig = "";
+    try{ await refresh(); }catch(e){ toast("Could not load conversation: "+e.message); }
+  } else {
+    try{ await setup(); }catch(e){ $("#mode-meta").textContent="setup failed: "+e.message; toast("Setup failed: "+e.message); }
+  }
   setInterval(refresh, 1200);
 })();
 </script>
