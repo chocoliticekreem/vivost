@@ -1,3 +1,4 @@
 copy-build: true
 build-dest: build
+base-folder: base
 verbose: true
