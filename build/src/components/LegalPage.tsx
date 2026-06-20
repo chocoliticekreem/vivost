@@ -7,13 +7,13 @@ import { LEGAL } from '../data/legal';
 const LegalPage: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
   <div style={{ maxWidth: '820px', margin: '0 auto', padding: '20px' }}>
     <nav style={{ marginBottom: '20px', fontSize: '14px' }}>
-      <Link to="/" style={{ color: '#666', textDecoration: 'none' }}>Home</Link>
+      <Link to="/" style={{ color: 'var(--text-2)', textDecoration: 'none' }}>Home</Link>
       <span style={{ margin: '0 8px' }}>&gt;</span>
       <span style={{ fontWeight: 'bold' }}>{title}</span>
     </nav>
-    <div className="card" style={{ lineHeight: 1.7 }}>
+    <div className="card" style={{ lineHeight: 1.7, color: 'var(--text-2)' }}>
       <h1 style={{ marginTop: 0 }}>{title}</h1>
-      <p style={{ color: '#888', fontSize: '13px', marginTop: '-8px' }}>Last updated: {LEGAL.lastUpdated}</p>
+      <p style={{ color: 'var(--text-3)', fontSize: '13px', marginTop: '-8px' }}>Last updated: {LEGAL.lastUpdated}</p>
       {children}
     </div>
   </div>

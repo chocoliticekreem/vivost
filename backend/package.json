@@ -1,0 +1,30 @@
+{
+  "name": "vivost-backend",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "migrate": "node --import tsx --env-file-if-exists=.env src/core/migrate.ts",
+    "dev:api": "node --import tsx --env-file-if-exists=.env src/app/index.ts",
+    "start": "node --import tsx --env-file-if-exists=.env src/app/index.ts",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.2.0",
+    "fastify": "^5.8.5",
+    "pg": "^8.13.1",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "@types/pg": "^8.11.10",
+    "eslint": "^9.18.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.20.0",
+    "vitest": "^2.1.8"
+  }
+}

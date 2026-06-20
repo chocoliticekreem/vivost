@@ -63,12 +63,13 @@ const CookieConsent: React.FC = () => {
 
   const barStyle: React.CSSProperties = {
     position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 9998,
-    background: '#fff', borderTop: '2px solid var(--color-header-bg)',
-    boxShadow: '0 -2px 12px rgba(0,0,0,0.15)', padding: '20px',
+    background: 'var(--glass-bg-strong)', borderTop: '2px solid var(--color-header-bg)',
+    WebkitBackdropFilter: 'blur(18px)', backdropFilter: 'blur(18px)',
+    boxShadow: '0 -2px 12px rgba(0,0,0,0.15)', padding: '20px', color: 'var(--text-2)',
   };
   const equalBtn: React.CSSProperties = {
-    padding: '10px 18px', borderRadius: '4px', border: '1px solid var(--color-header-bg)',
-    background: '#fff', color: 'var(--color-header-bg)', fontWeight: 'bold', cursor: 'pointer',
+    padding: '10px 18px', borderRadius: '4px', border: '1px solid var(--glass-border-strong)',
+    background: 'var(--glass-bg-soft)', color: 'var(--text-1)', fontWeight: 'bold', cursor: 'pointer',
   };
 
   return (
@@ -81,8 +82,8 @@ const CookieConsent: React.FC = () => {
         </p>
 
         {showDetail && (
-          <div style={{ margin: '12px 0', fontSize: '14px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', color: '#888' }}>
+          <div style={{ margin: '12px 0', fontSize: '14px', background: 'var(--glass-bg-soft)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-sm)', padding: '12px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-3)' }}>
               <input type="checkbox" checked disabled /> Strictly necessary (always on)
             </label>
             <label style={{ display: 'block', marginBottom: '8px' }}>
@@ -107,7 +108,7 @@ const CookieConsent: React.FC = () => {
               Save choices
             </button>
           ) : (
-            <button style={{ ...equalBtn, border: '1px solid #ccc', color: '#555' }} onClick={() => setShowDetail(true)}>
+            <button style={{ ...equalBtn, border: '1px solid var(--glass-border)', color: 'var(--text-2)' }} onClick={() => setShowDetail(true)}>
               Manage preferences
             </button>
           )}

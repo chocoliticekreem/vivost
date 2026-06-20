@@ -11,3 +11,10 @@ conformance_tests/
 *.log
 .env
 .playwright-mcp/
+
+# Real scraped listing data — personal data, never commit (regenerate locally)
+build/src/data/profiles.generated.ts
+scraper/urls.json
+scraper/data/
+# Screenshots may contain real listing photos
+shots/redesign-*.png

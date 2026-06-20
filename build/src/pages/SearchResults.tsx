@@ -117,7 +117,7 @@ const SearchResults: React.FC = () => {
               {filteredAndSortedProfiles.length} Results Found
             </h2>
             {filters.keyword && (
-              <p style={{ margin: '5px 0 0 0', color: '#666' }}>
+              <p style={{ margin: '5px 0 0 0', color: 'var(--text-3)' }}>
                 Searching for: "{filters.keyword}"
               </p>
             )}
