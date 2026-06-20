@@ -1,7 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { CATEGORIES } from '../data/categories';
+import { LEGAL } from '../data/legal';
 import AgeGate from './AgeGate';
+import CookieConsent, { openCookieSettings } from './CookieConsent';
 
 const Header: React.FC = () => (
   <header style={{ backgroundColor: 'var(--color-header-bg)', color: 'white', padding: '10px 20px' }}>
@@ -25,29 +27,42 @@ const Header: React.FC = () => (
   </header>
 );
 
+const footerLink: React.CSSProperties = { color: 'var(--color-header-bg)', textDecoration: 'none' };
+
 const Footer: React.FC = () => (
   <footer style={{ backgroundColor: '#fff', borderTop: '1px solid #ddd', padding: '40px 20px', marginTop: 'auto' }}>
     <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
       <div>
-        <h4>Company</h4>
-        <ul style={{ listStyle: 'none', padding: 0, fontSize: '14px' }}>
-          <li>About Us</li>
-          <li>Terms of Service</li>
-          <li>Privacy Policy</li>
+        <h4>Legal</h4>
+        <ul style={{ listStyle: 'none', padding: 0, fontSize: '14px', lineHeight: 1.9 }}>
+          <li><Link to="/terms" style={footerLink}>Terms of Service</Link></li>
+          <li><Link to="/privacy" style={footerLink}>Privacy Policy</Link></li>
+          <li><Link to="/cookies" style={footerLink}>Cookie Policy</Link></li>
+          <li>
+            <button onClick={openCookieSettings}
+              style={{ ...footerLink, background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }}>
+              Cookie settings
+            </button>
+          </li>
         </ul>
       </div>
       <div>
         <h4>Safety</h4>
-        <ul style={{ listStyle: 'none', padding: 0, fontSize: '14px' }}>
-          <li><a href="#">Safety Advice</a></li>
-          <li><a href="#">Report a listing</a></li>
-          <li><a href="#">Scam Awareness</a></li>
+        <ul style={{ listStyle: 'none', padding: 0, fontSize: '14px', lineHeight: 1.9 }}>
+          <li><Link to="/safety" style={footerLink}>Safety &amp; Reporting</Link></li>
+          <li><Link to="/safety" style={footerLink}>Report a listing</Link></li>
+          <li><Link to="/safety" style={footerLink}>Modern slavery &amp; trafficking</Link></li>
         </ul>
       </div>
       <div>
-        <h4>Legal</h4>
-        <p style={{ fontSize: '12px', fontWeight: 'bold', color: '#d32f2f' }}>
-          18 U.S.C. 2257 Recordkeeping Requirements Compliance Statement. 
+        <h4>{LEGAL.tradingName}</h4>
+        <p style={{ fontSize: '12px', color: '#666', lineHeight: 1.6 }}>
+          {LEGAL.legalEntity}<br />
+          Company no. {LEGAL.companyNumber}<br />
+          {LEGAL.registeredOffice}<br />
+          {LEGAL.generalEmail}
+        </p>
+        <p style={{ fontSize: '12px', fontWeight: 'bold' }}>
           This site is strictly for adults aged 18 and over.
         </p>
       </div>
@@ -59,6 +74,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <AgeGate />
+      <CookieConsent />
       <Header />
       <main style={{ flex: 1, padding: '20px' }}>
         {children}

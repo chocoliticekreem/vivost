@@ -4,6 +4,10 @@ import Layout from './components/Layout';
 import Home from './pages/Home';
 import SearchResults from './pages/SearchResults';
 import ProfileDetail from './pages/ProfileDetail';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import CookiePolicy from './pages/CookiePolicy';
+import Terms from './pages/Terms';
+import Safety from './pages/Safety';
 
 const App: React.FC = () => {
   try {
@@ -14,6 +18,10 @@ const App: React.FC = () => {
             <Route path="/" element={<Home />} />
             <Route path="/search" element={<SearchResults />} />
             <Route path="/profile/:id" element={<ProfileDetail />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/cookies" element={<CookiePolicy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/safety" element={<Safety />} />
             <Route path="*" element={<div>404 - Page Not Found</div>} />
           </Routes>
         </Layout>
