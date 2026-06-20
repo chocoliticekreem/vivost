@@ -1,4 +1,9 @@
-import type { EventBus, IdVerificationProvider, PaymentProvider } from "../ports";
+import type {
+  EventBus,
+  IdVerificationProvider,
+  ModerationProvider,
+  PaymentProvider,
+} from "../ports";
 import { fixedClock } from "../clock";
 
 export { fixedClock };
@@ -62,6 +67,37 @@ export function fakeIdVerificationProvider(
             ? null
             : new Date(0);
       return { status: outcome, method, checkedAt };
+    },
+  };
+}
+
+/**
+ * Deterministic fake ModerationProvider for tests. No network. Mirrors the
+ * Tier-2 LLM judgement with three fixed rules evaluated in order.
+ */
+export function fakeModerationProvider(): ModerationProvider {
+  return {
+    async analyze(input) {
+      const body = input.body;
+      if (/traffick|under ?age|under ?18|coerc|\b1[0-5]\b/i.test(body)) {
+        return {
+          flagged: true,
+          categories: ["safety_legal"],
+          score: 0.95,
+          action: "escalate",
+          reason: "safety_legal indicators detected",
+        };
+      }
+      if (/bitcoin|crypto|wire transfer|gift ?card|western union/i.test(body)) {
+        return {
+          flagged: true,
+          categories: ["financial_scam"],
+          score: 0.8,
+          action: "hold",
+          reason: "financial_scam indicators detected",
+        };
+      }
+      return { flagged: false, categories: [], score: 0, action: "allow", reason: "" };
     },
   };
 }

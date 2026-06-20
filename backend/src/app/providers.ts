@@ -1,5 +1,12 @@
 import { newId } from "../core";
-import type { EventBus, IdVerificationProvider, PaymentProvider } from "../core";
+import type {
+  EventBus,
+  IdVerificationProvider,
+  ModerationAction,
+  ModerationCategory,
+  ModerationProvider,
+  PaymentProvider,
+} from "../core";
 
 /**
  * Placeholder PaymentProvider for production wiring. Returns deterministic ids
@@ -65,4 +72,101 @@ export function inProcessEventBus(): EventBus {
       handlers.set(type, list);
     },
   };
+}
+
+const ALLOW_VERDICT = {
+  flagged: false,
+  categories: [] as ModerationCategory[],
+  score: 0,
+  action: "allow" as ModerationAction,
+  reason: "",
+};
+
+/**
+ * Placeholder ModerationProvider for production wiring. Always allows. Tier-1
+ * has already gated synchronously, so an inert Tier-2 is a safe default.
+ *
+ * TODO: replace with anthropicModerationProvider once ANTHROPIC_API_KEY is set.
+ */
+export function placeholderModerationProvider(): ModerationProvider {
+  return {
+    async analyze(_input) {
+      return { ...ALLOW_VERDICT };
+    },
+  };
+}
+
+const ANTHROPIC_MODEL = "claude-haiku-4-5-20251001";
+const ANTHROPIC_SYSTEM_PROMPT =
+  "You are a trust-and-safety classifier for an adult-services marketplace chat. " +
+  "Detect financial_scam, off_platform, harassment, safety_legal. Respond ONLY with JSON " +
+  "{flagged, categories[], score, action, reason}.";
+
+/**
+ * Real Tier-2 ModerationProvider backed by the Anthropic Messages API.
+ * Fails open (returns the allow verdict) on any error — Tier-1 already gated
+ * the message synchronously, so a failed async pass must never block delivery.
+ */
+export function anthropicModerationProvider(apiKey: string): ModerationProvider {
+  return {
+    async analyze(input) {
+      try {
+        const transcript = input.context
+          .map((m) => `${m.senderRole}: ${m.body}`)
+          .join("\n");
+        const userContent =
+          `focus categories: ${input.focus.join(", ")}\n\n` +
+          `conversation so far:\n${transcript}\n\n` +
+          `message to classify:\n${input.body}`;
+
+        const res = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "x-api-key": apiKey,
+            "anthropic-version": "2023-06-01",
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({
+            model: ANTHROPIC_MODEL,
+            max_tokens: 400,
+            system: ANTHROPIC_SYSTEM_PROMPT,
+            messages: [{ role: "user", content: userContent }],
+          }),
+        });
+        if (!res.ok) return { ...ALLOW_VERDICT };
+
+        const json = (await res.json()) as {
+          content?: { type: string; text?: string }[];
+        };
+        const text = json.content?.find((b) => b.type === "text")?.text;
+        if (!text) return { ...ALLOW_VERDICT };
+
+        const parsed = JSON.parse(text) as {
+          flagged: boolean;
+          categories: ModerationCategory[];
+          score: number;
+          action: ModerationAction;
+          reason: string;
+        };
+        return {
+          flagged: Boolean(parsed.flagged),
+          categories: Array.isArray(parsed.categories) ? parsed.categories : [],
+          score: typeof parsed.score === "number" ? parsed.score : 0,
+          action: parsed.action ?? "allow",
+          reason: typeof parsed.reason === "string" ? parsed.reason : "",
+        };
+      } catch {
+        return { ...ALLOW_VERDICT };
+      }
+    },
+  };
+}
+
+/**
+ * Production ModerationProvider: the real Anthropic pass when an API key is
+ * configured, otherwise the inert placeholder.
+ */
+export function productionModerationProvider(): ModerationProvider {
+  const key = process.env.ANTHROPIC_API_KEY;
+  return key ? anthropicModerationProvider(key) : placeholderModerationProvider();
 }

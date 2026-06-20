@@ -14,6 +14,8 @@ import { registerEnquiries } from "./enquiries";
 import { registerReviews } from "./reviews";
 import { registerAnalytics } from "./analytics";
 import { registerReferrals } from "./referrals";
+import { registerMessaging } from "./messaging";
+import { registerModeration } from "./moderation";
 
 export const allRegistrars: Array<(app: FastifyInstance, c: Container) => void> = [
   registerHealth,
@@ -30,4 +32,6 @@ export const allRegistrars: Array<(app: FastifyInstance, c: Container) => void> 
   registerReviews,
   registerAnalytics,
   registerReferrals,
+  registerMessaging,
+  registerModeration,
 ];
