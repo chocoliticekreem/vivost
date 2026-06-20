@@ -1,0 +1,215 @@
+---
+description: 'Vivost — a booking-style directory front-end for adult-services listings. Renders with safe placeholder data; real listing data is injected after rendering via the generated profile-data module (the database-swap point).'
+import:
+  - typescript-react-app-template
+requires:
+  - typescript-react-app-boilerplate
+---
+
+***definitions***
+
+- :Category: is a service category used to group listings. The standard categories are "Escorts", "Massage", "Companionship", and "Virtual" (online or remote).
+
+- :Profile: is a single listing for a service provider, shaped so each field maps cleanly onto a future database column. A :Profile: has an id, a display name, a :Category: slug, a location (a city name) and an optional area or neighbourhood, a numeric hourly rate, an availability label, an optional list of photo image URLs, a solid placeholder colour used when the photo list is empty, a description, an optional contact phone, an optional verified flag, an optional age, gender, ethnicity and list of languages, an optional list of offered services, an optional source URL, and a small list of attribute label and value pairs. In :PlaceholderData: every :Profile: uses safe placeholder values — a generic display name, an empty photo list, no contact phone, and a non-explicit description — so the rendered placeholder app describes no real person and embeds no external image. Real listing data is injected after rendering via :GeneratedProfileData:.
+
+- :PlaceholderData: is the in-memory dataset of :Category: and :Profile: records, held in TypeScript modules under "src/data", that stands in for a future database. The :Profile: records live in :GeneratedProfileData:.
+
+- :GeneratedProfileData: is the single TypeScript module "src/data/profiles.generated.ts" that exports the array of :Profile: records. It is the designated database-swap point: at render time it holds only safe placeholder records, and it is overwritten after rendering by an external data pipeline that supplies real listing data behind the same :Profile: shape. No other module hard-codes :Profile: records.
+
+- :AgeGate: is an age-verification gate, shown over :App: on first visit, that requires the visitor to confirm they are 18 years of age or older before any other content becomes interactive.
+
+- :Header: is the navigation bar shown at the top of every page of :App:.
+
+- :Footer: is the section shown at the bottom of every page of :App:. It links to each of the :LegalPages:, exposes a control to reopen :CookieConsent:, shows the :BusinessIdentity:, includes safety information, and shows a clear 18-and-over age statement. The :Footer: must contain only UK-appropriate legal text and must never reference United States law (for example a "18 U.S.C. 2257" statement).
+
+- :BusinessIdentity: is the operator's trading and contact details, defined once in a single TypeScript module under "src/data" and reused everywhere. It contains a trading name, registered company name, company number, registered office address, VAT number, ICO registration reference, a general contact email, a privacy contact email, and a listing-removal email. Every value that is not yet known is a clearly marked placeholder string beginning with "[PLACEHOLDER" so it is obvious it must be replaced before launch. This module is the single place to fill in real legal details later.
+
+- :LegalPages: are the static legal and safety pages of :App:: a Privacy Policy, a Cookie Policy, a Terms of Service, and a Safety and Reporting page. They share a common readable single-column layout with a title and a "last updated" date, and they read the operator's details from :BusinessIdentity:.
+
+- :CookieConsent: is a cookie-consent banner shown to first-time visitors that complies with UK PECR and ICO guidance: strictly-necessary technologies are always on, all other categories (statistical and marketing) are off by default and opt-in only, a "Reject all" control is shown with equal prominence to "Accept all", choices can be set granularly, and the visitor's choice is recorded in the browser localStorage with a timestamp. It can be reopened at any time from a control in the site footer and from the Cookie Policy page.
+
+
+***implementation reqs***
+
+- :App: should use the react-router-dom library for client-side routing between pages.
+
+- :App: should present a clean booking-style visual theme: a solid dark-blue :Header: bar, a light grey page background, white content cards with rounded corners and a subtle shadow, and a single amber accent colour used for primary buttons. The theme colours should be defined once as CSS custom properties and reused, so the design can be re-themed in one place.
+
+- All content displayed by :App: must come from :PlaceholderData: defined in TypeScript modules under "src/data"; :App: must not make any network or backend request for data. Each field of a :Profile: should map cleanly to a future database column.
+
+- All placeholder content in :GeneratedProfileData: must be non-explicit and safe for work: generic display names such as "Profile 1", lorem-ipsum style descriptions, empty photo lists, and no contact phone. Because the placeholder photo lists are empty, the rendered placeholder :App: shows plain solid-colour blocks in place of photographs and embeds no external image. When a :Profile: does carry photos (after real data is injected into :GeneratedProfileData:), :App: renders its first photo image, falling back to the solid colour block if the image fails to load.
+
+- :App: should be responsive and usable on both mobile-phone and desktop screen widths.
+
+- The :Header: and :Footer: should appear on every page of :App:.
+
+- :BusinessIdentity: must be defined once in a single TypeScript module under "src/data" and imported wherever the operator's details are shown (:LegalPages: and :Footer:); these details must not be hard-coded separately in more than one place.
+
+- Each of the :LegalPages: must be reachable at its own client-side route ("/privacy", "/cookies", "/terms", "/safety") and must be linked from the :Footer:.
+
+- :CookieConsent: must not set or run any non-essential (statistical or marketing) technology before the visitor has opted in; strictly-necessary storage (the :AgeGate: confirmation and the consent record itself) may be set without consent. The "Reject all" and "Accept all" controls must have equal visual prominence.
+
+- The :AgeGate: is self-declared age confirmation only. The code must carry a comment, and the :AgeGate: must show a short visitor-facing note, stating that self-declaration is not "highly effective age assurance" under the UK Online Safety Act 2023 and must be replaced with a real age-assurance provider before launching with adult content.
+
+
+***functional specs***
+
+- Build the application shell for :App:: a global layout containing the :Header: and :Footer: on every route, client-side routing with react-router-dom, the booking-style theme, and the :AgeGate:.
+
+    - The :Header: shows a "Vivost" wordmark logo on the left, a set of :Category: navigation links, a location-selector placeholder control, an account icon, and a prominent amber "Post an ad" button.
+
+    - Configure routes for the home page at "/", the search-results page at "/search", and the profile-detail page at "/profile/:id". For this functionality the "/search" and "/profile/:id" routes may render simple placeholder page components; later functionalities fill them in.
+
+    - The :Footer: shows several columns of placeholder navigation links, a short "Safety" column with placeholder safety-advice links and a "Report a listing" link, and a clearly visible statement that the site is strictly for adults aged 18 and over.
+
+    - On first load, the :AgeGate: is shown as a modal overlay covering the page. It states that the visitor must be 18 or older to continue and offers an "I am 18 or older — Enter" button and a "Leave" button. Choosing to enter hides the :AgeGate: and records the confirmation in the browser localStorage so it is not shown again on later visits. Until the visitor confirms, the rest of :App: is covered by the overlay and is not interactive.
+
+  ***acceptance tests***
+
+  - On a first visit with empty localStorage, an age-verification overlay is visible and contains text stating the visitor must be 18 or older.
+
+  - Clicking the "Enter" button on the age-verification overlay removes the overlay so the page content behind it becomes visible.
+
+  - The header displays the "Vivost" logo and an amber "Post an ad" button.
+
+  - The footer displays a statement indicating the site is for adults aged 18 and over.
+
+- Create the data layer as :PlaceholderData: in TypeScript modules under "src/data".
+
+    - Create "src/data/categories.ts" exporting the four standard :Category: records ("Escorts", "Massage", "Companionship", "Virtual"), each with a url slug, a display name, and a short description.
+
+    - Create "src/data/profiles.ts" that defines the :Profile: TypeScript type, re-exports the :Profile: array (named PROFILES) from :GeneratedProfileData: ("./profiles.generated"), and provides the helper functions below. "src/data/profiles.ts" must not hard-code any :Profile: records itself.
+
+    - Create :GeneratedProfileData: at "src/data/profiles.generated.ts" exporting at least eighteen safe placeholder :Profile: records spread across all four categories. Each record has a unique id, a placeholder name such as "Profile 1", a category slug, a placeholder city location, a numeric hourly rate, an availability label, an empty photo list, a placeholder image colour string used to render a solid colour block, a non-explicit lorem-ipsum description, no contact phone, and three or four attribute label and value pairs. Begin the module with a code comment stating it is auto-generated and is the single database-swap point that an external pipeline overwrites with real data after rendering.
+
+    - Provide helper functions in "src/data": getAllProfiles(), getProfileById(id), getProfilesByCategory(slug), a filterProfiles() function that filters by an optional category slug, location text, and maximum rate and an optional keyword matched against the name and description, and a sortProfiles() function that sorts by rate ascending or descending.
+
+    - Add a short code comment in each data module noting that these modules are the single place to replace with a real database later.
+
+- Build the home page at "/".
+
+    - A hero section at the top contains a search panel with a keyword text input, a :Category: dropdown populated from the categories in :PlaceholderData:, a location text input, and an amber "Search" button. Submitting the search navigates to "/search" passing the keyword, category, and location as URL query parameters.
+
+    - Below the hero, show a row of :Category: tiles, one for each :Category:, each linking to "/search" filtered by that category slug.
+
+    - Below the tiles, show a "Featured" heading and a responsive grid of :Profile: cards built from the first eight records in :PlaceholderData:. Each card shows the profile's first photo when it has any (otherwise the solid placeholder colour block), an "ID Verified" badge when the profile is verified, the profile name, its :Category:, its location (area and city when an area is present), and its rate, and the whole card links to that profile's "/profile/:id" page.
+
+  ***acceptance tests***
+
+  - The home page shows a search panel containing a category dropdown and a "Search" button.
+
+  - The home page shows a tile for each of the four standard categories.
+
+  - The home page shows at least eight profile cards in the featured grid.
+
+  - Clicking a featured profile card navigates the browser to a URL beginning with "/profile/".
+
+- Build the search-results page at "/search".
+
+    - The page uses a two-column layout with a filter sidebar on the left and a results area on the right. On narrow screens the sidebar stacks above the results.
+
+    - The filter sidebar contains :Category: filter options, a location text filter, a maximum-rate control, and a sort control offering "Rate: low to high" and "Rate: high to low".
+
+    - When the page loads it reads any "keyword", "category", and "location" values from the URL query parameters and applies them as the initial filters, using the filterProfiles() and sortProfiles() helpers against :PlaceholderData:.
+
+    - The results area shows a heading with the number of matching profiles and a responsive grid of :Profile: cards identical in shape to the home-page cards, each linking to its "/profile/:id" page. Changing a filter updates the visible cards and the count without a full page reload.
+
+  ***acceptance tests***
+
+  - Visiting "/search" shows a filter sidebar and a grid of profile cards.
+
+  - The results area shows a text count of the number of matching profiles.
+
+  - Selecting a single category in the filter sidebar reduces the visible cards to that category only.
+
+  - A profile card on the results page links to a URL beginning with "/profile/".
+
+- Build the profile-detail page at "/profile/:id".
+
+    - Look up the :Profile: by its id in :PlaceholderData:. If no profile matches, show a simple "Listing not found" message.
+
+    - The page shows a breadcrumb; a gallery area that renders the profile's photos when it has any (a larger main image with smaller secondary images, each falling back to a solid colour block on load error) or solid-colour image blocks when it has none; and a header with the profile name, an "ID Verified" badge when the profile is verified, its location (area and city), :Category:, and rate.
+
+    - The page shows the profile description, an attributes list rendering each attribute label and value pair, and, when the profile lists offered services, a "Services" section showing them.
+
+    - A contact panel on the side contains a "Show contact details" control and a "Report this listing" button that opens a small confirmation message when clicked. When the profile has a contact phone, "Show contact details" reveals that phone and offers a click-to-call link; when it has no phone, the control is disabled and reads "No contact number listed". The panel also shows the availability label, a verified-advertiser note when the profile is verified, and a link to the original listing when the profile has a source URL.
+
+    - Below the details, a "Similar profiles" section shows up to four other :Profile: cards from the same :Category:.
+
+  ***acceptance tests***
+
+  - Visiting the detail page for a valid profile id shows that profile's name and its description.
+
+  - The detail page shows an attributes list with at least one label and value pair.
+
+  - The detail page shows a "Report this listing" button.
+
+  - The detail page shows a "Similar profiles" section containing at least one additional profile card.
+
+- Wire the pages together and finalise the responsive booking-style design across :App:.
+
+    - Submitting the home-page search navigates to "/search" and the results reflect the submitted keyword, category, and location.
+
+    - Each :Category: link in the :Header: and each home-page :Category: tile navigates to "/search" filtered by that category.
+
+    - Ensure the booking-style theme is applied consistently across the home, search, and profile pages, including cards, buttons, :Header:, and :Footer:.
+
+    - Ensure the layout is responsive: the search-results page collapses to a single column on narrow viewports, profile-card grids reflow to fewer columns, and the page does not overflow horizontally on a 375-pixel-wide viewport.
+
+  ***acceptance tests***
+
+  - Submitting the home-page search navigates to a "/search" URL and shows a grid of profile cards.
+
+  - Clicking a category link in the header navigates to a "/search" URL showing profile cards.
+
+  - On a 375-pixel-wide viewport the home page does not scroll horizontally.
+
+  - The profile-detail page for a valid id continues to show the profile name after navigating to it from the search results.
+
+- Add the :BusinessIdentity: module, the :LegalPages:, and finalise the :Footer: for UK legal compliance.
+
+    - Create the :BusinessIdentity: module under "src/data" as the single source of the operator's details, with the trading name "Vivost" and every other field a clearly marked placeholder string beginning with "[PLACEHOLDER" (registered company name, company number, registered office, VAT number, ICO registration, general email, privacy email, listing-removal email), plus the real contact details for the Information Commissioner's Office, the Modern Slavery and Exploitation Helpline, and the National Crime Agency.
+
+    - Build the four :LegalPages: at "/privacy", "/cookies", "/terms", and "/safety", sharing a common single-column layout with a title and a "last updated" date and reading the operator's details from :BusinessIdentity:.
+
+    - The Privacy Policy must follow UK GDPR Articles 13 and 14: the data controller's identity, the lawful bases for processing, the categories of data collected, retention, recipients and international transfers, the individual's rights (access, rectification, erasure, restriction, objection, portability, and withdrawing consent) with how to exercise them, and the right to complain to the Information Commissioner's Office.
+
+    - The Cookie Policy must list the storage technologies used grouped by category (strictly necessary, statistical, marketing) and provide a control that reopens :CookieConsent:.
+
+    - The Terms of Service must state that the site is strictly for adults aged 18 and over, that listings advertise time and companionship only and never sexual services for payment, prohibit content involving anyone under 18 and any trafficking, coercion or exploitation, describe moderation and takedown, and state that the terms are governed by the law of England and Wales.
+
+    - The Safety and Reporting page must explain how to report a listing, tell visitors to call 999 in an emergency, and show the Modern Slavery and Exploitation Helpline number "0800 0121 700" and a link to report to the National Crime Agency.
+
+    - Update the :Footer: to link to all four :LegalPages:, show the :BusinessIdentity: and an 18-and-over statement, provide a "Cookie settings" control that reopens :CookieConsent:, and contain no United States legal text.
+
+    - On the profile-detail page, the "Report this listing" control must let the reporter choose a reason (including "may involve someone under 18" and "trafficking, coercion or exploitation") before submitting, and link to the Safety and Reporting page.
+
+  ***acceptance tests***
+
+  - Visiting "/privacy" shows a "Privacy Policy" heading and text describing the right to complain to the Information Commissioner's Office.
+
+  - Visiting "/terms" shows a "Terms of Service" heading.
+
+  - Visiting "/safety" shows the text "0800 0121 700".
+
+  - The footer shows a "Privacy Policy" link and does not contain the text "2257".
+
+  - The profile-detail page report control offers a reason option mentioning someone under 18.
+
+- Add the :CookieConsent: banner to :App:.
+
+    - On a first visit, show :CookieConsent: with plain-language information and a link to the Cookie Policy.
+
+    - :CookieConsent: shows a "Reject all" control and an "Accept all" control of equal visual prominence, and lets the visitor set the statistical and marketing categories granularly, both off by default; strictly-necessary technologies are always on.
+
+    - Record the visitor's choice in the browser localStorage with a timestamp, and do not show :CookieConsent: again once a choice has been recorded.
+
+    - :CookieConsent: can be reopened from the :Footer: "Cookie settings" control and from the Cookie Policy page.
+
+  ***acceptance tests***
+
+  - On a first visit, a cookie banner is visible containing both an "Accept all" control and a "Reject all" control.
+
+  - After clicking "Reject all", the cookie banner is no longer visible.
+
+  - Clicking the "Cookie settings" control in the footer makes the cookie banner visible again.
