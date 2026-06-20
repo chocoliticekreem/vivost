@@ -110,11 +110,11 @@ Moderation admin (`routes/moderation.ts`):
 - `fakeModerationProvider()` (in `core/testing`) — deterministic, no network. Used in the in-memory
   container and all tests.
 - `placeholderModerationProvider()` — always allows. Safe inert default.
-- `anthropicModerationProvider(apiKey)` — real `fetch` to the Anthropic Messages API
-  (`claude-haiku-4-5-20251001`, `anthropic-version: 2023-06-01`, JSON-only output). **Fails open**
-  to `allow` on any error — Tier-1 already gated the message synchronously, so a failed async pass
-  must never block delivery.
-- `productionModerationProvider()` — `anthropicModerationProvider` when `ANTHROPIC_API_KEY` is set,
+- `openaiModerationProvider(apiKey, model)` — real `fetch` to the OpenAI Chat Completions API in
+  JSON mode (default model `gpt-4o-mini`, overridable via `OPENAI_MODEL`). **Fails open** to `allow`
+  on any error — Tier-1 already gated the message synchronously, so a failed async pass must never
+  block delivery.
+- `productionModerationProvider()` — `openaiModerationProvider` when `OPENAI_API_KEY` is set,
   otherwise the placeholder.
 
 The in-memory container uses the fake; the pg container uses `productionModerationProvider()`. Both
@@ -124,8 +124,8 @@ subscribe `moderationService.screenDeep` to `message.sent` after the container i
 
 - **Admin authz.** Moderation routes pass actor IDs in the request body with no role enforcement.
   A real auth/role layer is needed before these endpoints are exposed to non-admins.
-- **Real LLM key wiring.** Tier-2 is inert until `ANTHROPIC_API_KEY` is provisioned in the pg
-  environment.
+- **Real LLM key wiring.** Tier-2 is inert until `OPENAI_API_KEY` is provisioned in the pg
+  environment (optionally set `OPENAI_MODEL`).
 - **Retention sweep.** The column design enables a scheduled retention/erasure sweep, but the cron
   job itself is out of scope for this build — documented, not built.
 - **Deeper safety integration.** Confirmed `safety_legal` cases currently publish a

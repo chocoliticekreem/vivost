@@ -86,7 +86,7 @@ const ALLOW_VERDICT = {
  * Placeholder ModerationProvider for production wiring. Always allows. Tier-1
  * has already gated synchronously, so an inert Tier-2 is a safe default.
  *
- * TODO: replace with anthropicModerationProvider once ANTHROPIC_API_KEY is set.
+ * TODO: replace with openaiModerationProvider once OPENAI_API_KEY is set.
  */
 export function placeholderModerationProvider(): ModerationProvider {
   return {
@@ -96,18 +96,20 @@ export function placeholderModerationProvider(): ModerationProvider {
   };
 }
 
-const ANTHROPIC_MODEL = "claude-haiku-4-5-20251001";
-const ANTHROPIC_SYSTEM_PROMPT =
+const OPENAI_DEFAULT_MODEL = "gpt-4o-mini";
+const MODERATION_SYSTEM_PROMPT =
   "You are a trust-and-safety classifier for an adult-services marketplace chat. " +
-  "Detect financial_scam, off_platform, harassment, safety_legal. Respond ONLY with JSON " +
-  "{flagged, categories[], score, action, reason}.";
+  "Detect financial_scam, off_platform, harassment, safety_legal. Respond ONLY with a JSON " +
+  'object {"flagged":boolean,"categories":string[],"score":number,"action":string,"reason":string} ' +
+  "where action is one of allow, redact, hold, block, flag, escalate.";
 
 /**
- * Real Tier-2 ModerationProvider backed by the Anthropic Messages API.
- * Fails open (returns the allow verdict) on any error — Tier-1 already gated
- * the message synchronously, so a failed async pass must never block delivery.
+ * Real Tier-2 ModerationProvider backed by the OpenAI Chat Completions API in
+ * JSON mode. Fails open (returns the allow verdict) on any error — Tier-1 has
+ * already gated the message synchronously, so a failed async pass must never
+ * block delivery. Model is overridable via OPENAI_MODEL.
  */
-export function anthropicModerationProvider(apiKey: string): ModerationProvider {
+export function openaiModerationProvider(apiKey: string, model: string): ModerationProvider {
   return {
     async analyze(input) {
       try {
@@ -119,34 +121,36 @@ export function anthropicModerationProvider(apiKey: string): ModerationProvider 
           `conversation so far:\n${transcript}\n\n` +
           `message to classify:\n${input.body}`;
 
-        const res = await fetch("https://api.anthropic.com/v1/messages", {
+        const res = await fetch("https://api.openai.com/v1/chat/completions", {
           method: "POST",
           headers: {
-            "x-api-key": apiKey,
-            "anthropic-version": "2023-06-01",
+            authorization: `Bearer ${apiKey}`,
             "content-type": "application/json",
           },
           body: JSON.stringify({
-            model: ANTHROPIC_MODEL,
+            model,
             max_tokens: 400,
-            system: ANTHROPIC_SYSTEM_PROMPT,
-            messages: [{ role: "user", content: userContent }],
+            response_format: { type: "json_object" },
+            messages: [
+              { role: "system", content: MODERATION_SYSTEM_PROMPT },
+              { role: "user", content: userContent },
+            ],
           }),
         });
         if (!res.ok) return { ...ALLOW_VERDICT };
 
         const json = (await res.json()) as {
-          content?: { type: string; text?: string }[];
+          choices?: { message?: { content?: string } }[];
         };
-        const text = json.content?.find((b) => b.type === "text")?.text;
+        const text = json.choices?.[0]?.message?.content;
         if (!text) return { ...ALLOW_VERDICT };
 
         const parsed = JSON.parse(text) as {
-          flagged: boolean;
-          categories: ModerationCategory[];
-          score: number;
-          action: ModerationAction;
-          reason: string;
+          flagged?: boolean;
+          categories?: ModerationCategory[];
+          score?: number;
+          action?: ModerationAction;
+          reason?: string;
         };
         return {
           flagged: Boolean(parsed.flagged),
@@ -163,10 +167,12 @@ export function anthropicModerationProvider(apiKey: string): ModerationProvider 
 }
 
 /**
- * Production ModerationProvider: the real Anthropic pass when an API key is
+ * Production ModerationProvider: the real OpenAI pass when an API key is
  * configured, otherwise the inert placeholder.
  */
 export function productionModerationProvider(): ModerationProvider {
-  const key = process.env.ANTHROPIC_API_KEY;
-  return key ? anthropicModerationProvider(key) : placeholderModerationProvider();
+  const key = process.env.OPENAI_API_KEY;
+  if (!key) return placeholderModerationProvider();
+  const model = process.env.OPENAI_MODEL ?? OPENAI_DEFAULT_MODEL;
+  return openaiModerationProvider(key, model);
 }

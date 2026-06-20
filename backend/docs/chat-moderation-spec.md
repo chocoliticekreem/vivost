@@ -299,16 +299,17 @@ create index if not exists moderation_verdict_queue_idx
 
 ### `src/app/providers.ts` (ADD)
 - `placeholderModerationProvider(): ModerationProvider` → always `{ flagged:false, categories:[], score:0, action:"allow", reason:"" }` (safe default, mirrors other placeholders).
-- `anthropicModerationProvider(apiKey: string): ModerationProvider` → real `fetch` to
-  `https://api.anthropic.com/v1/messages`, headers `x-api-key`, `anthropic-version: 2023-06-01`,
-  `content-type: application/json`. Model `claude-haiku-4-5-20251001`, `max_tokens: 400`. System
-  prompt: "You are a trust-and-safety classifier for an adult-services marketplace chat. Detect
-  financial_scam, off_platform, harassment, safety_legal. Respond ONLY with JSON
-  {flagged, categories[], score, action, reason}." User content = the focus categories, the context
-  transcript, and the message body. Parse the JSON from the first text block; on any error return the
-  safe-default allow verdict (fail-open for the async path — Tier-1 already gated synchronously).
-- `productionModerationProvider(): ModerationProvider` → `process.env.ANTHROPIC_API_KEY` present ?
-  `anthropicModerationProvider(key)` : `placeholderModerationProvider()`.
+- `openaiModerationProvider(apiKey: string, model: string): ModerationProvider` → real `fetch` to
+  `https://api.openai.com/v1/chat/completions`, header `authorization: Bearer <key>`,
+  `content-type: application/json`. Default model `gpt-4o-mini`, `max_tokens: 400`,
+  `response_format: { type: "json_object" }`. System prompt: "You are a trust-and-safety classifier
+  for an adult-services marketplace chat. Detect financial_scam, off_platform, harassment,
+  safety_legal. Respond ONLY with a JSON object {flagged, categories[], score, action, reason}."
+  User content = the focus categories, the context transcript, and the message body. Parse
+  `choices[0].message.content` as JSON; on any error return the safe-default allow verdict (fail-open
+  for the async path — Tier-1 already gated synchronously).
+- `productionModerationProvider(): ModerationProvider` → `process.env.OPENAI_API_KEY` present ?
+  `openaiModerationProvider(key, process.env.OPENAI_MODEL ?? "gpt-4o-mini")` : `placeholderModerationProvider()`.
 
 ### `src/app/container.ts`
 - Add `moderationService: ModerationService` and `messagingService: MessagingService` to `Container`.
