@@ -51,7 +51,15 @@ export class AccountsService {
     const normalisedEmail = normaliseEmail(email);
     const existing = await this.repo.findByEmail(normalisedEmail);
     if (existing) return existing;
-    return this.register({ email: normalisedEmail, role });
+    try {
+      return await this.register({ email: normalisedEmail, role });
+    } catch (err) {
+      // Lost a concurrent create race (e.g. StrictMode double-mount, or two
+      // requests at once) — the duplicate-email write failed; return the winner.
+      const afterRace = await this.repo.findByEmail(normalisedEmail);
+      if (afterRace) return afterRace;
+      throw err;
+    }
   }
 
   async getById(id: UUID): Promise<Account> {
