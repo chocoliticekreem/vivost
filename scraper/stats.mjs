@@ -1,0 +1,11 @@
+import { readFile } from "node:fs/promises";
+const d = JSON.parse(await readFile(new URL("./data/listings.json", import.meta.url))).filter((r) => !r.error);
+const phone = d.filter((r) => (r.phones || []).length > 0);
+const london = d.filter((r) => /london/i.test(r.location_raw || "") || /london/i.test(r.region || ""));
+const ids = new Set(d.map((r) => r.source_ad_id));
+console.log("total:", d.length, "| unique ids:", ids.size);
+console.log("with_phone:", phone.length, "| no_phone_tagged:", d.length - phone.length);
+console.log("london_confirmed:", london.length, "| NOT london:", d.length - london.length);
+console.log("verified:", d.filter((r) => r.verified).length, "| with_photos:", d.filter((r) => (r.photos || []).length > 0).length);
+const notL = d.filter((r) => !(/london/i.test(r.location_raw || "") || /london/i.test(r.region || "")));
+if (notL.length) console.log("non-london examples:", notL.slice(0, 5).map((r) => `${r.location_raw} [region=${r.region}]`));
