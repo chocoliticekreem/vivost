@@ -1,5 +1,5 @@
 ---
-description: 'Vivost — a booking-style directory front-end for adult-services listings, rendered with placeholder data only.'
+description: 'Vivost — a booking-style directory front-end for adult-services listings. Renders with safe placeholder data; real listing data is injected after rendering via the generated profile-data module (the database-swap point).'
 import:
   - typescript-react-app-template
 requires:
@@ -10,9 +10,11 @@ requires:
 
 - :Category: is a service category used to group listings. The standard categories are "Escorts", "Massage", "Companionship", and "Virtual" (online or remote).
 
-- :Profile: is a single placeholder listing for a service provider. A :Profile: has an id, a placeholder display name, a :Category:, a placeholder location (a city name), a placeholder hourly rate, a placeholder availability label, a placeholder image represented as a solid colour block (no external image is loaded), a non-explicit placeholder description, and a small list of attribute label and value pairs. All values are placeholder data and do not describe real people.
+- :Profile: is a single listing for a service provider, shaped so each field maps cleanly onto a future database column. A :Profile: has an id, a display name, a :Category: slug, a location (a city name) and an optional area or neighbourhood, a numeric hourly rate, an availability label, an optional list of photo image URLs, a solid placeholder colour used when the photo list is empty, a description, an optional contact phone, an optional verified flag, an optional age, gender, ethnicity and list of languages, an optional list of offered services, an optional source URL, and a small list of attribute label and value pairs. In :PlaceholderData: every :Profile: uses safe placeholder values — a generic display name, an empty photo list, no contact phone, and a non-explicit description — so the rendered placeholder app describes no real person and embeds no external image. Real listing data is injected after rendering via :GeneratedProfileData:.
 
-- :PlaceholderData: is the in-memory dataset of :Category: and :Profile: records, held in TypeScript modules, that stands in for a future database.
+- :PlaceholderData: is the in-memory dataset of :Category: and :Profile: records, held in TypeScript modules under "src/data", that stands in for a future database. The :Profile: records live in :GeneratedProfileData:.
+
+- :GeneratedProfileData: is the single TypeScript module "src/data/profiles.generated.ts" that exports the array of :Profile: records. It is the designated database-swap point: at render time it holds only safe placeholder records, and it is overwritten after rendering by an external data pipeline that supplies real listing data behind the same :Profile: shape. No other module hard-codes :Profile: records.
 
 - :AgeGate: is an age-verification gate, shown over :App: on first visit, that requires the visitor to confirm they are 18 years of age or older before any other content becomes interactive.
 
@@ -35,7 +37,7 @@ requires:
 
 - All content displayed by :App: must come from :PlaceholderData: defined in TypeScript modules under "src/data"; :App: must not make any network or backend request for data. Each field of a :Profile: should map cleanly to a future database column.
 
-- All placeholder content must be non-explicit and safe for work: generic display names such as "Profile 1", lorem-ipsum style descriptions, and plain solid-colour blocks in place of photographs. :App: must not request or embed any external image.
+- All placeholder content in :GeneratedProfileData: must be non-explicit and safe for work: generic display names such as "Profile 1", lorem-ipsum style descriptions, empty photo lists, and no contact phone. Because the placeholder photo lists are empty, the rendered placeholder :App: shows plain solid-colour blocks in place of photographs and embeds no external image. When a :Profile: does carry photos (after real data is injected into :GeneratedProfileData:), :App: renders its first photo image, falling back to the solid colour block if the image fails to load.
 
 - :App: should be responsive and usable on both mobile-phone and desktop screen widths.
 
@@ -72,13 +74,15 @@ requires:
 
   - The footer displays a statement indicating the site is for adults aged 18 and over.
 
-- Create the placeholder data layer as :PlaceholderData: in TypeScript modules under "src/data".
+- Create the data layer as :PlaceholderData: in TypeScript modules under "src/data".
 
     - Create "src/data/categories.ts" exporting the four standard :Category: records ("Escorts", "Massage", "Companionship", "Virtual"), each with a url slug, a display name, and a short description.
 
-    - Create "src/data/profiles.ts" exporting at least eighteen :Profile: records spread across all four categories. Each record has a unique id, a placeholder name such as "Profile 1", a category slug, a placeholder city location, a numeric placeholder hourly rate, an availability label, a placeholder image colour string used to render a solid colour block, a non-explicit lorem-ipsum description, and three or four attribute label and value pairs.
+    - Create "src/data/profiles.ts" that defines the :Profile: TypeScript type, re-exports the :Profile: array (named PROFILES) from :GeneratedProfileData: ("./profiles.generated"), and provides the helper functions below. "src/data/profiles.ts" must not hard-code any :Profile: records itself.
 
-    - Provide helper functions in "src/data": getAllProfiles(), getProfileById(id), getProfilesByCategory(slug), a filterProfiles() function that filters by an optional category slug, location text, and maximum rate, and a sortProfiles() function that sorts by rate ascending or descending.
+    - Create :GeneratedProfileData: at "src/data/profiles.generated.ts" exporting at least eighteen safe placeholder :Profile: records spread across all four categories. Each record has a unique id, a placeholder name such as "Profile 1", a category slug, a placeholder city location, a numeric hourly rate, an availability label, an empty photo list, a placeholder image colour string used to render a solid colour block, a non-explicit lorem-ipsum description, no contact phone, and three or four attribute label and value pairs. Begin the module with a code comment stating it is auto-generated and is the single database-swap point that an external pipeline overwrites with real data after rendering.
+
+    - Provide helper functions in "src/data": getAllProfiles(), getProfileById(id), getProfilesByCategory(slug), a filterProfiles() function that filters by an optional category slug, location text, and maximum rate and an optional keyword matched against the name and description, and a sortProfiles() function that sorts by rate ascending or descending.
 
     - Add a short code comment in each data module noting that these modules are the single place to replace with a real database later.
 
@@ -88,7 +92,7 @@ requires:
 
     - Below the hero, show a row of :Category: tiles, one for each :Category:, each linking to "/search" filtered by that category slug.
 
-    - Below the tiles, show a "Featured" heading and a responsive grid of :Profile: cards built from the first eight records in :PlaceholderData:. Each card shows the solid-colour image block, the profile name, its :Category:, its location, and its rate, and the whole card links to that profile's "/profile/:id" page.
+    - Below the tiles, show a "Featured" heading and a responsive grid of :Profile: cards built from the first eight records in :PlaceholderData:. Each card shows the profile's first photo when it has any (otherwise the solid placeholder colour block), an "ID Verified" badge when the profile is verified, the profile name, its :Category:, its location (area and city when an area is present), and its rate, and the whole card links to that profile's "/profile/:id" page.
 
   ***acceptance tests***
 
@@ -124,11 +128,11 @@ requires:
 
     - Look up the :Profile: by its id in :PlaceholderData:. If no profile matches, show a simple "Listing not found" message.
 
-    - The page shows a breadcrumb, a gallery area made of several solid-colour image blocks, and a header with the profile name, :Category:, location, and rate.
+    - The page shows a breadcrumb; a gallery area that renders the profile's photos when it has any (a larger main image with smaller secondary images, each falling back to a solid colour block on load error) or solid-colour image blocks when it has none; and a header with the profile name, an "ID Verified" badge when the profile is verified, its location (area and city), :Category:, and rate.
 
-    - The page shows the profile description and an attributes list rendering each attribute label and value pair.
+    - The page shows the profile description, an attributes list rendering each attribute label and value pair, and, when the profile lists offered services, a "Services" section showing them.
 
-    - A contact panel on the side contains a "Show contact details" placeholder button and a "Report this listing" button that opens a small confirmation message when clicked.
+    - A contact panel on the side contains a "Show contact details" control and a "Report this listing" button that opens a small confirmation message when clicked. When the profile has a contact phone, "Show contact details" reveals that phone and offers a click-to-call link; when it has no phone, the control is disabled and reads "No contact number listed". The panel also shows the availability label, a verified-advertiser note when the profile is verified, and a link to the original listing when the profile has a source URL.
 
     - Below the details, a "Similar profiles" section shows up to four other :Profile: cards from the same :Category:.
 
