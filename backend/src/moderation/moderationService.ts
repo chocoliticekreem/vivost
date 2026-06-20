@@ -43,8 +43,8 @@ export class ModerationService {
   }): InlineResult {
     const t1 = screenTier1(input.body);
     const now = this.clock.now();
-    const needsReview =
-      t1.action === "hold" || t1.action === "escalate" || t1.action === "block";
+    const needsReview = t1.action === "block";
+    const score = t1.action === "allow" ? 0 : t1.action === "redact" ? 0.5 : 0.9;
 
     const verdict: ModerationVerdict = {
       id: newId(),
@@ -52,7 +52,7 @@ export class ModerationService {
       conversationId: input.conversationId,
       tier: 1,
       categories: t1.categories,
-      score: t1.action === "allow" ? 0 : 0.7,
+      score,
       action: t1.action,
       reason:
         t1.categories.length > 0
@@ -72,7 +72,7 @@ export class ModerationService {
    * Call only after the referenced message row exists (FK on message_id).
    */
   async commitInline(verdict: ModerationVerdict): Promise<void> {
-    if (verdict.action === "escalate") {
+    if (verdict.categories.includes("safety_legal")) {
       await this.eventBus.publish({
         type: "moderation.safety_escalation",
         payload: {

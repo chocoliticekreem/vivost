@@ -250,8 +250,14 @@ async function refresh(){
 
 async function send(role, body){
   if(!body.trim() || !convId) return;
-  try{ await api(`/conversations/${convId}/messages`,{method:"POST",body:JSON.stringify({senderRole:role, body})});
-    await refresh(); }
+  try{
+    const result = await api(`/conversations/${convId}/messages`,{method:"POST",body:JSON.stringify({senderRole:role, body})});
+    const mod = result && result.moderation;
+    if(mod && mod.warning){
+      toast(mod.blocked ? "🚫 "+mod.warning : mod.warning);
+    }
+    await refresh();
+  }
   catch(e){ toast("Send failed: "+e.message); }
 }
 

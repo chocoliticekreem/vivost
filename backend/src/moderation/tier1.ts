@@ -6,8 +6,8 @@ const ACTION_RANK: Record<ModerationAction, number> = {
   flag: 1,
   redact: 2,
   hold: 3,
-  block: 4,
-  escalate: 5,
+  escalate: 4,
+  block: 5,
 };
 
 const OFF_PLATFORM_PATTERNS: RegExp[] = [
@@ -29,7 +29,8 @@ const SAFETY_LEGAL =
 /**
  * Pure, deterministic Tier-1 screen. No I/O. Detects the four moderation
  * categories, masks off-platform contact details, and picks the strongest
- * action by precedence: escalate > block > hold > redact > flag > allow.
+ * action by precedence: block > redact > allow. The abuse categories
+ * (safety_legal, financial_scam, harassment) block; off_platform redacts.
  */
 export function screenTier1(body: string): Tier1Result {
   const categories: ModerationCategory[] = [];
@@ -44,21 +45,21 @@ export function screenTier1(body: string): Tier1Result {
   const safetyMatch = SAFETY_LEGAL.exec(body);
   if (safetyMatch) {
     categories.push("safety_legal");
-    escalate("escalate");
+    escalate("block");
     excerptIndex = safetyMatch.index;
   }
 
   const harassmentMatch = HARASSMENT.exec(body);
   if (harassmentMatch) {
     categories.push("harassment");
-    escalate("flag");
+    escalate("block");
     if (excerptIndex === null) excerptIndex = harassmentMatch.index;
   }
 
   const financialMatch = FINANCIAL_SCAM.exec(body);
   if (financialMatch) {
     categories.push("financial_scam");
-    escalate("hold");
+    escalate("block");
     if (excerptIndex === null) excerptIndex = financialMatch.index;
   }
 

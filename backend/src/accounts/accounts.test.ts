@@ -39,6 +39,24 @@ describe("AccountsService.register", () => {
   });
 });
 
+describe("AccountsService.ensureByEmail", () => {
+  it("creates an account when none exists", async () => {
+    const { service } = makeService();
+    const account = await service.ensureByEmail("New@Example.com");
+    expect(account.email).toBe("new@example.com");
+    expect(account.role).toBe("advertiser");
+    expect(account.id).toBeTruthy();
+  });
+
+  it("returns the same account when one already exists (no duplicate)", async () => {
+    const { repo, service } = makeService();
+    const first = await service.ensureByEmail("dupe@example.com");
+    const second = await service.ensureByEmail("DUPE@example.com");
+    expect(second.id).toBe(first.id);
+    expect(await repo.findByEmail("dupe@example.com")).toBeTruthy();
+  });
+});
+
 describe("AccountsService.getById", () => {
   it("throws NotFoundError when missing", async () => {
     const { service } = makeService();

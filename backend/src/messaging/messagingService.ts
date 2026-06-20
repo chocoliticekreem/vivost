@@ -10,6 +10,7 @@ import type {
   Message,
   MessageStatus,
   SendMessageInput,
+  SendMessageResult,
   StartConversationInput,
 } from "./types";
 import type { ConversationRepository } from "./conversationRepository";
@@ -51,7 +52,7 @@ export class MessagingService {
 
   async sendMessage(
     input: { conversationId: UUID } & SendMessageInput,
-  ): Promise<Message> {
+  ): Promise<SendMessageResult> {
     const conversation = await this.conversations.getById(input.conversationId);
     if (!conversation) {
       throw new NotFoundError("Conversation not found");
@@ -111,10 +112,11 @@ export class MessagingService {
 
     await this.conversations.save({ ...conversation, updatedAt: now });
 
+    const history = await this.messages.listByConversation(
+      input.conversationId,
+    );
+
     if (status !== "blocked" && status !== "held") {
-      const history = await this.messages.listByConversation(
-        input.conversationId,
-      );
       const context = history
         .slice(-CONTEXT_WINDOW)
         .map((m) => ({ senderRole: m.senderRole, body: m.body }));
@@ -130,7 +132,39 @@ export class MessagingService {
       });
     }
 
-    return saved;
+    const strikeCount = history.filter(
+      (m) => m.senderRole === parsed.senderRole && m.status === "blocked",
+    ).length;
+
+    const blocked = status === "blocked" || status === "held";
+    const delivered = status === "delivered" || status === "redacted";
+    const redacted = status === "redacted";
+    const categories = evaluation.verdict.categories;
+
+    let warning: string | null;
+    if (blocked) {
+      warning = `⚠ Your message was blocked (${categories.join(
+        ", ",
+      )}). This is warning ${strikeCount}. Keep the conversation on-platform and respectful.`;
+    } else if (redacted) {
+      warning = "Contact details were hidden for your safety and kept on record.";
+    } else {
+      warning = null;
+    }
+
+    return {
+      message: saved,
+      moderation: {
+        action: evaluation.verdict.action,
+        categories,
+        blocked,
+        delivered,
+        redacted,
+        reason: evaluation.verdict.reason,
+        strikeCount,
+        warning,
+      },
+    };
   }
 
   async getConversation(id: UUID): Promise<Conversation> {

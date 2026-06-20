@@ -59,7 +59,7 @@ describe("MessagingService.sendMessage", () => {
     eventBus.subscribe("message.sent", spy);
 
     const conv = await service.startConversation(participants());
-    const msg = await service.sendMessage({
+    const { message: msg, moderation } = await service.sendMessage({
       conversationId: conv.id,
       senderRole: "customer",
       body: "are you available friday evening?",
@@ -67,6 +67,9 @@ describe("MessagingService.sendMessage", () => {
 
     expect(msg.status).toBe("delivered");
     expect(msg.originalBody).toBeNull();
+    expect(moderation.action).toBe("allow");
+    expect(moderation.delivered).toBe(true);
+    expect(moderation.warning).toBeNull();
     expect(spy).toHaveBeenCalledTimes(1);
     const payload = spy.mock.calls[0]?.[0] as {
       context: { senderRole: string; body: string }[];
@@ -80,7 +83,7 @@ describe("MessagingService.sendMessage", () => {
     const { service } = makeService();
     const conv = await service.startConversation(participants());
     const original = "ring +44 7700 900456 tonight";
-    const msg = await service.sendMessage({
+    const { message: msg, moderation } = await service.sendMessage({
       conversationId: conv.id,
       senderRole: "worker",
       body: original,
@@ -90,26 +93,60 @@ describe("MessagingService.sendMessage", () => {
     expect(msg.body).toContain("[redacted]");
     expect(msg.body).not.toMatch(/900456/);
     expect(msg.originalBody).toBe(original);
+    expect(moderation.redacted).toBe(true);
+    expect(moderation.delivered).toBe(true);
+    expect(moderation.warning).not.toBeNull();
   });
 
-  it("holds a payment-word message and does not publish for Tier-2", async () => {
+  it("blocks a payment-word message, does not deliver it, and warns the sender", async () => {
     const { service, eventBus } = makeService();
     const spy = vi.fn();
     eventBus.subscribe("message.sent", spy);
 
     const conv = await service.startConversation(participants());
-    const msg = await service.sendMessage({
+    const { message: msg, moderation } = await service.sendMessage({
       conversationId: conv.id,
       senderRole: "customer",
       body: "send a deposit via cashapp first",
     });
 
-    expect(msg.status).toBe("held");
+    expect(msg.status).toBe("blocked");
     expect(msg.originalBody).toBeNull();
+    expect(moderation.blocked).toBe(true);
+    expect(moderation.delivered).toBe(false);
+    expect(moderation.action).toBe("block");
+    expect(moderation.warning).not.toBeNull();
+    expect(moderation.strikeCount).toBe(1);
     expect(spy).not.toHaveBeenCalled();
+
+    const visible = await service.listMessages(conv.id);
+    const deliveredToRecipient = visible.filter(
+      (m) => m.status === "delivered" || m.status === "redacted",
+    );
+    expect(deliveredToRecipient).toHaveLength(0);
   });
 
-  it("delivers a safety body but raises a Tier-1 escalation", async () => {
+  it("increments strikeCount on a second blocked send", async () => {
+    const { service } = makeService();
+    const conv = await service.startConversation(participants());
+    const first = await service.sendMessage({
+      conversationId: conv.id,
+      senderRole: "customer",
+      body: "send a deposit via cashapp first",
+    });
+    expect(first.moderation.strikeCount).toBe(1);
+
+    const second = await service.sendMessage({
+      conversationId: conv.id,
+      senderRole: "customer",
+      body: "pay me on paypal now",
+    });
+    expect(second.message.status).toBe("blocked");
+    expect(second.moderation.strikeCount).toBe(2);
+    expect(second.moderation.warning).toContain("warning 2");
+  });
+
+  it("blocks a safety body, does not deliver it, and raises a Tier-1 escalation", async () => {
     const { service, eventBus } = makeService();
     const sent = vi.fn();
     const escalation = vi.fn();
@@ -117,15 +154,16 @@ describe("MessagingService.sendMessage", () => {
     eventBus.subscribe("moderation.safety_escalation", escalation);
 
     const conv = await service.startConversation(participants());
-    const msg = await service.sendMessage({
+    const { message: msg, moderation } = await service.sendMessage({
       conversationId: conv.id,
       senderRole: "customer",
       body: "are you underage?",
     });
 
-    expect(msg.status).toBe("delivered");
+    expect(msg.status).toBe("blocked");
+    expect(moderation.blocked).toBe(true);
     expect(escalation).toHaveBeenCalledTimes(1);
-    expect(sent).toHaveBeenCalledTimes(1);
+    expect(sent).not.toHaveBeenCalled();
   });
 
   it("throws NotFoundError for a missing conversation", async () => {

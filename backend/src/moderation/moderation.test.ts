@@ -51,16 +51,22 @@ describe("screenTier1", () => {
     expect(r.redactedBody).not.toMatch(/whatsapp/i);
   });
 
-  it("holds a payment-redirect body", () => {
+  it("blocks a payment-redirect body", () => {
     const r = screenTier1("send a deposit via cashapp first");
-    expect(r.action).toBe("hold");
+    expect(r.action).toBe("block");
     expect(r.categories).toContain("financial_scam");
     expect(r.redactedBody).toBe("send a deposit via cashapp first");
   });
 
-  it("escalates a safety_legal body and wins precedence over off_platform", () => {
+  it("blocks a harassment body", () => {
+    const r = screenTier1("i know where you live");
+    expect(r.action).toBe("block");
+    expect(r.categories).toContain("harassment");
+  });
+
+  it("blocks a safety_legal body and wins precedence over off_platform", () => {
     const r = screenTier1("she is underage, text whatsapp now");
-    expect(r.action).toBe("escalate");
+    expect(r.action).toBe("block");
     expect(r.categories).toContain("safety_legal");
   });
 
@@ -81,7 +87,7 @@ describe("ModerationService.screenInline", () => {
 
     expect(verdict.action).toBe("redact");
     expect(verdict.tier).toBe(1);
-    expect(verdict.score).toBe(0.7);
+    expect(verdict.score).toBe(0.5);
     expect(verdict.needsReview).toBe(false);
     expect(redactedBody).toContain("[redacted]");
 
@@ -89,17 +95,18 @@ describe("ModerationService.screenInline", () => {
     expect(stored).toHaveLength(1);
   });
 
-  it("holds a payment word and marks needsReview", async () => {
+  it("blocks a payment word and marks needsReview", async () => {
     const { service } = makeService();
     const { verdict } = await service.screenInline(
       inlineInput("pay the deposit by bitcoin"),
     );
-    expect(verdict.action).toBe("hold");
+    expect(verdict.action).toBe("block");
+    expect(verdict.score).toBe(0.9);
     expect(verdict.needsReview).toBe(true);
     expect(verdict.reviewStatus).toBe("open");
   });
 
-  it("escalates a safety word and publishes moderation.safety_escalation", async () => {
+  it("blocks a safety word and publishes moderation.safety_escalation", async () => {
     const { service, eventBus } = makeService();
     const spy = vi.fn();
     eventBus.subscribe("moderation.safety_escalation", spy);
@@ -107,7 +114,7 @@ describe("ModerationService.screenInline", () => {
     const { verdict } = await service.screenInline(
       inlineInput("are you underage?"),
     );
-    expect(verdict.action).toBe("escalate");
+    expect(verdict.action).toBe("block");
     expect(verdict.needsReview).toBe(true);
     expect(spy).toHaveBeenCalledTimes(1);
     expect(spy.mock.calls[0]?.[0]).toMatchObject({

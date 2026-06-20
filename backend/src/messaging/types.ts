@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { UUID } from "../core";
+import type { ModerationAction, ModerationCategory, UUID } from "../core";
 
 export interface Conversation {
   id: UUID;
@@ -22,6 +22,22 @@ export interface Message {
   status: MessageStatus;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface MessageModeration {
+  action: ModerationAction;
+  categories: ModerationCategory[];
+  blocked: boolean;
+  delivered: boolean;
+  redacted: boolean;
+  reason: string;
+  strikeCount: number;
+  warning: string | null;
+}
+
+export interface SendMessageResult {
+  message: Message;
+  moderation: MessageModeration;
 }
 
 export const startConversationSchema = z.object({
