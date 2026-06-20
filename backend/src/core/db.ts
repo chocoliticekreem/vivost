@@ -20,7 +20,13 @@ export function createPgDb(connectionString?: string): Db {
         "createPgDb: no connection string provided and DATABASE_URL is not set",
       );
     }
-    pool = new pg.Pool({ connectionString: conn });
+    // Managed Postgres (e.g. Supabase) requires TLS. Enable it for remote hosts;
+    // leave local connections plain so tests against a local server still work.
+    const isLocal = /@(localhost|127\.0\.0\.1|::1)[:/]/.test(conn);
+    pool = new pg.Pool({
+      connectionString: conn,
+      ssl: isLocal ? undefined : { rejectUnauthorized: false },
+    });
     return pool;
   }
 

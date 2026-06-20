@@ -7,9 +7,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "migrate": "node --import tsx src/core/migrate.ts",
-    "dev:api": "node --import tsx src/app/index.ts",
-    "start": "node --import tsx src/app/index.ts",
+    "migrate": "node --import tsx --env-file-if-exists=.env src/core/migrate.ts",
+    "dev:api": "node --import tsx --env-file-if-exists=.env src/app/index.ts",
+    "start": "node --import tsx --env-file-if-exists=.env src/app/index.ts",
     "lint": "eslint ."
   },
   "dependencies": {
