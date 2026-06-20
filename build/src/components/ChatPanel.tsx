@@ -3,6 +3,7 @@ import {
   startConversation,
   listMessages,
   sendMessage,
+  API_BASE,
   type Message,
   type MessageModeration,
 } from '../api/chat';
@@ -136,6 +137,16 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ workerRef, workerName, onClose })
             <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'var(--text-3)' }}>
               Protected by AI moderation — keep it on-platform.
             </p>
+            {conversationId && (
+              <a
+                href={`${API_BASE}/chat?conversationId=${conversationId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ display: 'inline-block', marginTop: '6px', fontSize: '11px', color: 'var(--text-3)', textDecoration: 'underline' }}
+              >
+                Open worker view ↗ (reply as the worker to mimic a chat)
+              </a>
+            )}
           </div>
           <button
             onClick={onClose}
