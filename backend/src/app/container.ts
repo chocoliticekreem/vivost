@@ -194,7 +194,10 @@ export function createInMemoryContainer(opts?: { clock?: Clock }): Container {
   void geoService.seed();
 
   eventBus.subscribe("message.sent", (p) => {
-    void container.moderationService.screenDeep(p as any);
+    // Tier-2 runs off the hot path; never let its failure crash the process.
+    void container.moderationService.screenDeep(p as any).catch((err: unknown) => {
+      console.error("[moderation] Tier-2 screenDeep failed", err);
+    });
   });
 
   return container;
@@ -274,7 +277,10 @@ export function createPgContainer(db: Db, opts?: { clock?: Clock }): Container {
   };
 
   eventBus.subscribe("message.sent", (p) => {
-    void container.moderationService.screenDeep(p as any);
+    // Tier-2 runs off the hot path; never let its failure crash the process.
+    void container.moderationService.screenDeep(p as any).catch((err: unknown) => {
+      console.error("[moderation] Tier-2 screenDeep failed", err);
+    });
   });
 
   return container;
