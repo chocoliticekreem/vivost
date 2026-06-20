@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 
+// COMPLIANCE NOTE: this is self-declaration age verification. Under the Online
+// Safety Act 2023, a service showing adult/sexualised content to UK users must
+// use "highly effective age assurance" (HEAA) — Ofcom explicitly rules out a
+// self-declared "I am 18" checkbox. Before launching with real adult content,
+// replace this with a HEAA provider (e.g. facial age estimation, photo-ID match,
+// open banking, credit-card or MNO check — Yoti, Persona, VerifyMy, etc.).
+
 const AgeGate: React.FC = () => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const enterButtonRef = useRef<HTMLButtonElement>(null);
@@ -64,6 +71,10 @@ const AgeGate: React.FC = () => {
             Leave
           </button>
         </div>
+        <p style={{ fontSize: '11px', color: '#888', marginTop: '16px', marginBottom: 0 }}>
+          By entering you confirm you are 18+ and agree to our{' '}
+          <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.
+        </p>
       </div>
     </div>
   );

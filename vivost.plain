@@ -18,7 +18,13 @@ requires:
 
 - :Header: is the navigation bar shown at the top of every page of :App:.
 
-- :Footer: is the section shown at the bottom of every page of :App:, including safety information and a clear 18-and-over age statement.
+- :Footer: is the section shown at the bottom of every page of :App:. It links to each of the :LegalPages:, exposes a control to reopen :CookieConsent:, shows the :BusinessIdentity:, includes safety information, and shows a clear 18-and-over age statement. The :Footer: must contain only UK-appropriate legal text and must never reference United States law (for example a "18 U.S.C. 2257" statement).
+
+- :BusinessIdentity: is the operator's trading and contact details, defined once in a single TypeScript module under "src/data" and reused everywhere. It contains a trading name, registered company name, company number, registered office address, VAT number, ICO registration reference, a general contact email, a privacy contact email, and a listing-removal email. Every value that is not yet known is a clearly marked placeholder string beginning with "[PLACEHOLDER" so it is obvious it must be replaced before launch. This module is the single place to fill in real legal details later.
+
+- :LegalPages: are the static legal and safety pages of :App:: a Privacy Policy, a Cookie Policy, a Terms of Service, and a Safety and Reporting page. They share a common readable single-column layout with a title and a "last updated" date, and they read the operator's details from :BusinessIdentity:.
+
+- :CookieConsent: is a cookie-consent banner shown to first-time visitors that complies with UK PECR and ICO guidance: strictly-necessary technologies are always on, all other categories (statistical and marketing) are off by default and opt-in only, a "Reject all" control is shown with equal prominence to "Accept all", choices can be set granularly, and the visitor's choice is recorded in the browser localStorage with a timestamp. It can be reopened at any time from a control in the site footer and from the Cookie Policy page.
 
 
 ***implementation reqs***
@@ -34,6 +40,14 @@ requires:
 - :App: should be responsive and usable on both mobile-phone and desktop screen widths.
 
 - The :Header: and :Footer: should appear on every page of :App:.
+
+- :BusinessIdentity: must be defined once in a single TypeScript module under "src/data" and imported wherever the operator's details are shown (:LegalPages: and :Footer:); these details must not be hard-coded separately in more than one place.
+
+- Each of the :LegalPages: must be reachable at its own client-side route ("/privacy", "/cookies", "/terms", "/safety") and must be linked from the :Footer:.
+
+- :CookieConsent: must not set or run any non-essential (statistical or marketing) technology before the visitor has opted in; strictly-necessary storage (the :AgeGate: confirmation and the consent record itself) may be set without consent. The "Reject all" and "Accept all" controls must have equal visual prominence.
+
+- The :AgeGate: is self-declared age confirmation only. The code must carry a comment, and the :AgeGate: must show a short visitor-facing note, stating that self-declaration is not "highly effective age assurance" under the UK Online Safety Act 2023 and must be replaced with a real age-assurance provider before launching with adult content.
 
 
 ***functional specs***
@@ -147,3 +161,51 @@ requires:
   - On a 375-pixel-wide viewport the home page does not scroll horizontally.
 
   - The profile-detail page for a valid id continues to show the profile name after navigating to it from the search results.
+
+- Add the :BusinessIdentity: module, the :LegalPages:, and finalise the :Footer: for UK legal compliance.
+
+    - Create the :BusinessIdentity: module under "src/data" as the single source of the operator's details, with the trading name "Vivost" and every other field a clearly marked placeholder string beginning with "[PLACEHOLDER" (registered company name, company number, registered office, VAT number, ICO registration, general email, privacy email, listing-removal email), plus the real contact details for the Information Commissioner's Office, the Modern Slavery and Exploitation Helpline, and the National Crime Agency.
+
+    - Build the four :LegalPages: at "/privacy", "/cookies", "/terms", and "/safety", sharing a common single-column layout with a title and a "last updated" date and reading the operator's details from :BusinessIdentity:.
+
+    - The Privacy Policy must follow UK GDPR Articles 13 and 14: the data controller's identity, the lawful bases for processing, the categories of data collected, retention, recipients and international transfers, the individual's rights (access, rectification, erasure, restriction, objection, portability, and withdrawing consent) with how to exercise them, and the right to complain to the Information Commissioner's Office.
+
+    - The Cookie Policy must list the storage technologies used grouped by category (strictly necessary, statistical, marketing) and provide a control that reopens :CookieConsent:.
+
+    - The Terms of Service must state that the site is strictly for adults aged 18 and over, that listings advertise time and companionship only and never sexual services for payment, prohibit content involving anyone under 18 and any trafficking, coercion or exploitation, describe moderation and takedown, and state that the terms are governed by the law of England and Wales.
+
+    - The Safety and Reporting page must explain how to report a listing, tell visitors to call 999 in an emergency, and show the Modern Slavery and Exploitation Helpline number "0800 0121 700" and a link to report to the National Crime Agency.
+
+    - Update the :Footer: to link to all four :LegalPages:, show the :BusinessIdentity: and an 18-and-over statement, provide a "Cookie settings" control that reopens :CookieConsent:, and contain no United States legal text.
+
+    - On the profile-detail page, the "Report this listing" control must let the reporter choose a reason (including "may involve someone under 18" and "trafficking, coercion or exploitation") before submitting, and link to the Safety and Reporting page.
+
+  ***acceptance tests***
+
+  - Visiting "/privacy" shows a "Privacy Policy" heading and text describing the right to complain to the Information Commissioner's Office.
+
+  - Visiting "/terms" shows a "Terms of Service" heading.
+
+  - Visiting "/safety" shows the text "0800 0121 700".
+
+  - The footer shows a "Privacy Policy" link and does not contain the text "2257".
+
+  - The profile-detail page report control offers a reason option mentioning someone under 18.
+
+- Add the :CookieConsent: banner to :App:.
+
+    - On a first visit, show :CookieConsent: with plain-language information and a link to the Cookie Policy.
+
+    - :CookieConsent: shows a "Reject all" control and an "Accept all" control of equal visual prominence, and lets the visitor set the statistical and marketing categories granularly, both off by default; strictly-necessary technologies are always on.
+
+    - Record the visitor's choice in the browser localStorage with a timestamp, and do not show :CookieConsent: again once a choice has been recorded.
+
+    - :CookieConsent: can be reopened from the :Footer: "Cookie settings" control and from the Cookie Policy page.
+
+  ***acceptance tests***
+
+  - On a first visit, a cookie banner is visible containing both an "Accept all" control and a "Reject all" control.
+
+  - After clicking "Reject all", the cookie banner is no longer visible.
+
+  - Clicking the "Cookie settings" control in the footer makes the cookie banner visible again.
