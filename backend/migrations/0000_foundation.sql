@@ -57,6 +57,10 @@ create table if not exists app.audit_log (
   detail    jsonb
 );
 
+-- Append-only, backend-only. RLS with no policy => only the service role (which
+-- bypasses RLS) can access it; anon/authenticated are denied.
+alter table app.audit_log enable row level security;
+
 -- Shared trigger function: domains attach this BEFORE UPDATE to maintain an
 -- updated_at column. Usage in a domain migration:
 --   create trigger set_updated_at before update on app.some_table
