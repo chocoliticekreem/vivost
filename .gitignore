@@ -20,5 +20,3 @@ scraper/data/
 shots/redesign-*.png
 .vercel
 
-# Vercel function bundle (generated)
-api/_app.cjs
