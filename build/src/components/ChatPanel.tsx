@@ -142,9 +142,15 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ workerRef, workerName, onClose })
                 href={`${API_BASE}/chat?conversationId=${conversationId}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ display: 'inline-block', marginTop: '6px', fontSize: '11px', color: 'var(--text-3)', textDecoration: 'underline' }}
+                title="Opens the dual customer ↔ worker tester with this conversation carried over"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: '10px',
+                  fontSize: '12px', fontWeight: 700, color: '#fff', textDecoration: 'none',
+                  background: 'linear-gradient(135deg, var(--accent), var(--accent-2))',
+                  padding: '7px 12px', borderRadius: '9px',
+                }}
               >
-                Open worker view ↗ (reply as the worker to mimic a chat)
+                🔀 Test customer ↔ worker chat ↗
               </a>
             )}
           </div>

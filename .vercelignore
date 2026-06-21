@@ -1,0 +1,9 @@
+scraper/
+shots/
+base/
+*.plain
+render.sh
+config.yaml
+POST_RENDER_FIXES.md
+backend/server.log
+build/devserver.log

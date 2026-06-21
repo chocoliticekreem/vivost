@@ -9,7 +9,9 @@
  * (env / DefinePlugin) is a follow-up.
  */
 
-export const API_BASE = 'http://localhost:8787';
+// Injected at build time by webpack DefinePlugin (process.env.API_BASE).
+// Defaults to the local backend for development.
+export const API_BASE = process.env.API_BASE || 'http://localhost:8787';
 
 const CUSTOMER_EMAIL_KEY = 'vivost-customer-email';
 const CONVO_KEY_PREFIX = 'vivost-convo-';

@@ -18,3 +18,5 @@ scraper/urls.json
 scraper/data/
 # Screenshots may contain real listing photos
 shots/redesign-*.png
+.vercel
+
