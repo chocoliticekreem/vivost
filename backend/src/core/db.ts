@@ -26,6 +26,13 @@ export function createPgDb(connectionString?: string): Db {
     pool = new pg.Pool({
       connectionString: conn,
       ssl: isLocal ? undefined : { rejectUnauthorized: false },
+      keepAlive: true,
+    });
+    // Managed poolers (e.g. Supabase) drop idle connections. Without an 'error'
+    // listener, pg re-emits that on the pool as an unhandled 'error' event and
+    // crashes the whole process. Log and let pg discard/recreate the client.
+    pool.on("error", (err) => {
+      console.error("[db] idle pg client error (recovering):", err.message);
     });
     return pool;
   }
