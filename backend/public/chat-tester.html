@@ -147,7 +147,9 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const API = location.origin;
+// Backend base: on Vercel the tester is served at /api/chat, so the API lives
+// under /api; locally it's served at /chat and the API is at the origin root.
+const API = location.origin + (location.pathname.startsWith('/api/') ? '/api' : '');
 let worker=null, customer=null, convId=null, lastSig="";
 
 const $ = s => document.querySelector(s);
