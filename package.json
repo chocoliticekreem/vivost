@@ -2,9 +2,9 @@
   "name": "vivost",
   "version": "0.0.0",
   "private": true,
-  "type": "module",
   "dependencies": {
     "@fastify/cors": "^11.2.0",
+    "esbuild": "^0.24.2",
     "fastify": "^5.8.5",
     "pg": "^8.13.1",
     "zod": "^3.24.1"

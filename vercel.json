@@ -1,11 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "cd build && npm install && npm run build",
+  "buildCommand": "node scripts/build-api.mjs && cd build && npm install && npm run build",
   "outputDirectory": "build/dist",
   "installCommand": "npm install",
   "functions": {
-    "api/index.ts": {
-      "includeFiles": "backend/public/**"
+    "api/index.js": {
+      "includeFiles": "{api/_app.cjs,backend/public/**}"
     }
   },
   "rewrites": [

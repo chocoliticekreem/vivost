@@ -5,25 +5,36 @@ import type { FastifyInstance, FastifyReply } from "fastify";
 import type { Container } from "../container";
 
 /**
- * Candidate locations for the tester HTML. The import.meta.url path works in
- * local dev (tsx) where the file sits next to the source tree; the cwd-relative
- * paths cover Vercel, where the function runs from the project root and the
- * file is bundled via `includeFiles: backend/public/**`.
+ * Candidate locations for the tester HTML, computed lazily at request time.
+ * The import.meta.url path works in local dev (tsx) where the file sits next to
+ * the source tree; the cwd-relative paths cover Vercel, where the function runs
+ * from the project root and the file is bundled via `includeFiles`. The
+ * import.meta.url candidate is guarded because esbuild's bundled CJS output can
+ * leave it unusable as a URL base — falling back to the cwd paths.
  */
-const htmlCandidates = [
-  fileURLToPath(new URL("../../../public/chat-tester.html", import.meta.url)),
-  path.join(process.cwd(), "backend/public/chat-tester.html"),
-  path.join(process.cwd(), "public/chat-tester.html"),
-];
+function htmlCandidates(): string[] {
+  const candidates: string[] = [];
+  try {
+    candidates.push(
+      fileURLToPath(new URL("../../../public/chat-tester.html", import.meta.url)),
+    );
+  } catch {
+    // import.meta.url not usable here (bundled function) — use cwd paths.
+  }
+  candidates.push(path.join(process.cwd(), "backend/public/chat-tester.html"));
+  candidates.push(path.join(process.cwd(), "public/chat-tester.html"));
+  return candidates;
+}
 
 function readTesterHtml(): string {
-  for (const candidate of htmlCandidates) {
+  const candidates = htmlCandidates();
+  for (const candidate of candidates) {
     if (existsSync(candidate)) {
       return readFileSync(candidate, "utf8");
     }
   }
   throw new Error(
-    `chat-tester.html not found; looked in: ${htmlCandidates.join(", ")}`,
+    `chat-tester.html not found; looked in: ${candidates.join(", ")}`,
   );
 }
 
