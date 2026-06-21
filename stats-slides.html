@@ -38,23 +38,17 @@
   .side.customer{color:var(--accent-2);background:rgba(177,91,255,.12)}
 
   .num{font-weight:850;letter-spacing:-3px;line-height:.92;
-    font-size:clamp(88px,17vw,210px);
+    font-size:clamp(92px,18vw,220px);
     background:linear-gradient(135deg,#ffffff,#e7d7ff);-webkit-background-clip:text;background-clip:text;color:transparent}
   .num.good{background:linear-gradient(135deg,#9bffd9,var(--good));-webkit-background-clip:text;background-clip:text;color:transparent}
   .num.warn{background:linear-gradient(135deg,#ffdf9a,var(--warn));-webkit-background-clip:text;background-clip:text;color:transparent}
 
-  .desc{font-size:clamp(19px,2.6vw,30px);line-height:1.4;max-width:18ch;margin:22px 0 0;font-weight:500}
+  .desc{font-size:clamp(20px,2.8vw,32px);line-height:1.38;max-width:18ch;margin:24px 0 0;font-weight:500}
   .desc b{font-weight:800}
   .src{margin-top:20px;font-size:13px;color:var(--text-3)}
   .chip{margin-top:26px;font-size:13px;font-weight:700;letter-spacing:.2px;color:var(--accent);
     background:rgba(255,61,127,.12);border:1px solid rgba(255,61,127,.30);padding:8px 16px;border-radius:999px}
 
-  /* title + close slides */
-  .big-title{font-size:clamp(34px,5.5vw,62px);font-weight:850;letter-spacing:-1.5px;line-height:1.08;max-width:16ch}
-  .big-title span{background:linear-gradient(90deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent}
-  .lede{margin-top:20px;font-size:clamp(16px,2vw,21px);color:var(--text-2);max-width:34ch}
-
-  /* nav */
   .nav{position:fixed;bottom:24px;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:18px;z-index:5}
   .dots{display:flex;gap:7px}
   .dot{width:7px;height:7px;border-radius:50%;background:#3a3446;cursor:pointer;transition:.2s}
@@ -70,31 +64,16 @@
 <div class="brand"><div class="logo">V</div><b>Vivost</b></div>
 
 <div class="deck" id="deck">
-  <!-- 0 title -->
-  <section class="slide active">
-    <div class="big-title">The harm happens <span>in the first messages.</span></div>
-    <div class="lede">Every stat that follows is something Vivost's AI moderation blocks, redacts or flags — in the chat, on both sides.</div>
-  </section>
-
   <!-- 1 worker -->
-  <section class="slide">
+  <section class="slide active">
     <div class="side worker">Worker safety</div>
     <div class="num">#1</div>
     <div class="desc">Digital harassment is the <b>most common crime</b> online sex workers face.</div>
-    <div class="src">Beyond the Gaze / National Ugly Mugs, UK · 2015 (47% have experienced a crime)</div>
+    <div class="src">Beyond the Gaze / National Ugly Mugs, UK · 2015</div>
     <div class="chip">Blocked by harassment filter</div>
   </section>
 
   <!-- 2 worker -->
-  <section class="slide">
-    <div class="side worker">Worker safety</div>
-    <div class="num good">~27%</div>
-    <div class="desc">less workplace violence when clients are <b>pre-screened</b>.</div>
-    <div class="src">McBride et al., BMC Public Health · 2022 (and ~30% fewer condom refusals)</div>
-    <div class="chip">Solved by client screening + strikes</div>
-  </section>
-
-  <!-- 3 worker -->
   <section class="slide">
     <div class="side worker">Worker safety</div>
     <div class="num good">90.5%</div>
@@ -103,55 +82,31 @@
     <div class="chip">Kept on-platform by contact redaction</div>
   </section>
 
-  <!-- 4 worker -->
+  <!-- 3 worker -->
   <section class="slide">
     <div class="side worker">Worker safety</div>
     <div class="num warn">7.7%</div>
-    <div class="desc">of incidents reach <b>police</b> — down from 28%. Nearly all harm stays invisible.</div>
-    <div class="src">National Ugly Mugs, UK · 2021</div>
+    <div class="desc">of incidents ever reach <b>police</b> — nearly all harm stays invisible.</div>
+    <div class="src">National Ugly Mugs, UK · 2021 (down from 28%)</div>
     <div class="chip">Filled by moderator queue + audit log</div>
+  </section>
+
+  <!-- 4 customer -->
+  <section class="slide">
+    <div class="side customer">Customer protection</div>
+    <div class="num warn">41%</div>
+    <div class="desc">of UK push-payment scam losses are <b>never refunded</b>.</div>
+    <div class="src">UK Finance, Annual Fraud Report · 2025</div>
+    <div class="chip">Stopped before payment by scam block</div>
   </section>
 
   <!-- 5 customer -->
   <section class="slide">
     <div class="side customer">Customer protection</div>
-    <div class="num warn">41%</div>
-    <div class="desc">of UK push-payment scam losses are <b>never refunded</b>.</div>
-    <div class="src">UK Finance, Annual Fraud Report · 2025 (only 59% reimbursed)</div>
-    <div class="chip">Stopped before payment by scam block</div>
-  </section>
-
-  <!-- 6 customer -->
-  <section class="slide">
-    <div class="side customer">Customer protection</div>
     <div class="num">+59%</div>
-    <div class="desc">jump in <b>sextortion &amp; blackmail</b> reports in one year — escort customers are targeted.</div>
-    <div class="src">FBI IC3 · 2024 (~55,000 reports) · PSNI public warning</div>
+    <div class="desc">surge in <b>sextortion &amp; blackmail</b> reports in one year — escort customers are targeted.</div>
+    <div class="src">FBI IC3 · 2024 · PSNI public warning</div>
     <div class="chip">Caught by blackmail &amp; threat detection</div>
-  </section>
-
-  <!-- 7 customer -->
-  <section class="slide">
-    <div class="side customer">Customer protection</div>
-    <div class="num">$10,079</div>
-    <div class="desc">median loss when a scam is paid in <b>crypto</b> — the rail you're pushed off-platform to use.</div>
-    <div class="src">US FTC · 2023</div>
-    <div class="chip">Blocked by payment-redirection filter</div>
-  </section>
-
-  <!-- 8 customer -->
-  <section class="slide">
-    <div class="side customer">Customer protection</div>
-    <div class="num warn">£106m</div>
-    <div class="desc">lost to <b>romance &amp; dating fraud</b> in the UK in a single year.</div>
-    <div class="src">UK Action Fraud / City of London Police · 2025</div>
-    <div class="chip">Reduced by fake-profile &amp; scam flags</div>
-  </section>
-
-  <!-- 9 close -->
-  <section class="slide">
-    <div class="big-title">One layer. <span>Both sides. Every message.</span></div>
-    <div class="lede">Vivost moderates the conversation in real time — redacting contact details, blocking scams, and flagging threats before they land.</div>
   </section>
 </div>
 
