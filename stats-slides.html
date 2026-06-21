@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vivost · Stats deck</title>
+<style>
+  :root{
+    --bg-0:#060509; --text-1:#f4f2f8; --text-2:#b8b3c6; --text-3:#7d7790;
+    --glass-border:rgba(255,255,255,0.09); --panel:rgba(255,255,255,0.04);
+    --accent:#ff3d7f; --accent-2:#b15bff; --good:#3ddc9a; --warn:#ffb020;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--text-1);overflow:hidden;
+    background:
+      radial-gradient(900px 620px at 12% -10%, rgba(177,91,255,.20), transparent 60%),
+      radial-gradient(900px 620px at 100% 0%, rgba(255,61,127,.18), transparent 55%),
+      var(--bg-0);
+    -webkit-font-smoothing:antialiased;
+  }
+  .deck{position:relative;height:100vh;width:100vw}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;padding:7vh 8vw}
+  .slide.active{display:flex;animation:fade .3s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+  .brand{position:fixed;top:26px;left:30px;display:flex;align-items:center;gap:9px;z-index:5}
+  .logo{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    display:grid;place-items:center;font-weight:800;color:#fff;font-size:13px}
+  .brand b{font-size:14px;letter-spacing:.3px}
+
+  .side{font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:24px;
+    padding:6px 14px;border-radius:999px;border:1px solid var(--glass-border)}
+  .side.worker{color:var(--accent);background:rgba(255,61,127,.10)}
+  .side.customer{color:var(--accent-2);background:rgba(177,91,255,.12)}
+
+  .num{font-weight:850;letter-spacing:-3px;line-height:.92;
+    font-size:clamp(92px,18vw,220px);
+    background:linear-gradient(135deg,#ffffff,#e7d7ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .num.good{background:linear-gradient(135deg,#9bffd9,var(--good));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .num.warn{background:linear-gradient(135deg,#ffdf9a,var(--warn));-webkit-background-clip:text;background-clip:text;color:transparent}
+
+  .desc{font-size:clamp(20px,2.8vw,32px);line-height:1.38;max-width:18ch;margin:24px 0 0;font-weight:500}
+  .desc b{font-weight:800}
+  .src{margin-top:20px;font-size:13px;color:var(--text-3)}
+  .chip{margin-top:26px;font-size:13px;font-weight:700;letter-spacing:.2px;color:var(--accent);
+    background:rgba(255,61,127,.12);border:1px solid rgba(255,61,127,.30);padding:8px 16px;border-radius:999px}
+
+  .nav{position:fixed;bottom:24px;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:18px;z-index:5}
+  .dots{display:flex;gap:7px}
+  .dot{width:7px;height:7px;border-radius:50%;background:#3a3446;cursor:pointer;transition:.2s}
+  .dot.active{background:var(--accent);width:22px;border-radius:999px}
+  .arrow{width:40px;height:40px;border-radius:50%;border:1px solid var(--glass-border);background:var(--panel);
+    color:var(--text-1);font-size:18px;cursor:pointer;display:grid;place-items:center;transition:.18s}
+  .arrow:hover{border-color:var(--accent);background:rgba(255,61,127,.12)}
+  .counter{position:fixed;bottom:28px;right:30px;font-size:12px;color:var(--text-3);font-variant-numeric:tabular-nums;z-index:5}
+  .hint{position:fixed;bottom:28px;left:30px;font-size:11px;color:var(--text-3);z-index:5}
+</style>
+</head>
+<body>
+<div class="brand"><div class="logo">V</div><b>Vivost</b></div>
+
+<div class="deck" id="deck">
+  <!-- 1 worker -->
+  <section class="slide active">
+    <div class="side worker">Worker safety</div>
+    <div class="num">#1</div>
+    <div class="desc">Digital harassment is the <b>most common crime</b> online sex workers face.</div>
+    <div class="src">Beyond the Gaze / National Ugly Mugs, UK · 2015</div>
+    <div class="chip">Blocked by harassment filter</div>
+  </section>
+
+  <!-- 2 worker -->
+  <section class="slide">
+    <div class="side worker">Worker safety</div>
+    <div class="num good">90.5%</div>
+    <div class="desc">of online-only workers say working <b>online improved their safety</b>.</div>
+    <div class="src">Beyond the Gaze, University of Leicester, UK · 2018</div>
+    <div class="chip">Kept on-platform by contact redaction</div>
+  </section>
+
+  <!-- 3 worker -->
+  <section class="slide">
+    <div class="side worker">Worker safety</div>
+    <div class="num warn">7.7%</div>
+    <div class="desc">of incidents ever reach <b>police</b> — nearly all harm stays invisible.</div>
+    <div class="src">National Ugly Mugs, UK · 2021 (down from 28%)</div>
+    <div class="chip">Filled by moderator queue + audit log</div>
+  </section>
+
+  <!-- 4 customer -->
+  <section class="slide">
+    <div class="side customer">Customer protection</div>
+    <div class="num warn">41%</div>
+    <div class="desc">of UK push-payment scam losses are <b>never refunded</b>.</div>
+    <div class="src">UK Finance, Annual Fraud Report · 2025</div>
+    <div class="chip">Stopped before payment by scam block</div>
+  </section>
+
+  <!-- 5 customer -->
+  <section class="slide">
+    <div class="side customer">Customer protection</div>
+    <div class="num">+59%</div>
+    <div class="desc">surge in <b>sextortion &amp; blackmail</b> reports in one year — escort customers are targeted.</div>
+    <div class="src">FBI IC3 · 2024 · PSNI public warning</div>
+    <div class="chip">Caught by blackmail &amp; threat detection</div>
+  </section>
+</div>
+
+<div class="nav">
+  <button class="arrow" id="prev" aria-label="Previous">‹</button>
+  <div class="dots" id="dots"></div>
+  <button class="arrow" id="next" aria-label="Next">›</button>
+</div>
+<div class="counter" id="counter"></div>
+<div class="hint">← → arrow keys</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const dotsWrap = document.getElementById('dots');
+  const counter = document.getElementById('counter');
+  let i = 0;
+  slides.forEach((_, n) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (n === 0 ? ' active' : '');
+    d.addEventListener('click', () => go(n));
+    dotsWrap.appendChild(d);
+  });
+  const dots = Array.from(document.querySelectorAll('.dot'));
+  function go(n){
+    i = (n + slides.length) % slides.length;
+    slides.forEach((s,k)=>s.classList.toggle('active', k===i));
+    dots.forEach((d,k)=>d.classList.toggle('active', k===i));
+    counter.textContent = (i+1) + ' / ' + slides.length;
+  }
+  document.getElementById('next').onclick = () => go(i+1);
+  document.getElementById('prev').onclick = () => go(i-1);
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') go(i+1);
+    if (e.key === 'ArrowLeft') go(i-1);
+  });
+  go(0);
+</script>
+</body>
+</html>

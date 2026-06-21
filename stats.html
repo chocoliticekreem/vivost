@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vivost · The problem we solve</title>
+<style>
+  :root{
+    --bg-0:#060509; --bg-1:#0d0b13; --panel:rgba(255,255,255,0.035);
+    --glass-border:rgba(255,255,255,0.09); --glass-soft:rgba(255,255,255,0.05);
+    --text-1:#f4f2f8; --text-2:#b8b3c6; --text-3:#7d7790;
+    --accent:#ff3d7f; --accent-2:#b15bff; --good:#3ddc9a; --warn:#ffb020;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--text-1);min-height:100vh;
+    background:
+      radial-gradient(900px 600px at 12% -8%, rgba(177,91,255,.20), transparent 60%),
+      radial-gradient(900px 600px at 100% 0%, rgba(255,61,127,.18), transparent 55%),
+      var(--bg-0);
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1000px;margin:0 auto;padding:40px 28px 56px}
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:26px}
+  .logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    display:grid;place-items:center;font-weight:800;color:#fff;font-size:15px}
+  .brand b{font-size:15px;letter-spacing:.3px}
+  .brand .tag{margin-left:auto;font-size:11px;color:var(--text-3);border:1px solid var(--glass-border);
+    padding:4px 10px;border-radius:999px}
+  h1{font-size:30px;line-height:1.15;margin:0 0 8px;letter-spacing:-.5px}
+  h1 span{background:linear-gradient(90deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:var(--text-2);margin:0 0 26px;font-size:15px;max-width:680px}
+
+  /* tabs */
+  .tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;margin-bottom:22px;
+    scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+  .tabs::-webkit-scrollbar{height:6px}
+  .tabs::-webkit-scrollbar-thumb{background:#2a2536;border-radius:8px}
+  .tab{flex:0 0 auto;cursor:pointer;border:1px solid var(--glass-border);background:var(--glass-soft);
+    color:var(--text-2);padding:10px 18px;border-radius:999px;font-weight:600;font-size:14px;white-space:nowrap;
+    transition:.18s}
+  .tab:hover{color:var(--text-1);border-color:rgba(255,255,255,.2)}
+  .tab.active{color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-2));border-color:transparent;
+    box-shadow:0 6px 22px rgba(255,61,127,.28)}
+
+  .panel{display:none;animation:fade .25s ease}
+  .panel.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:680px){.grid{grid-template-columns:1fr}}
+
+  .card{border:1px solid var(--glass-border);background:var(--panel);border-radius:16px;padding:20px 20px 16px;
+    position:relative;overflow:hidden;backdrop-filter:blur(6px)}
+  .card::before{content:"";position:absolute;inset:0 auto auto 0;width:3px;height:100%;
+    background:linear-gradient(var(--accent),var(--accent-2))}
+  .num{font-size:42px;font-weight:800;letter-spacing:-1px;line-height:1;
+    background:linear-gradient(135deg,#fff,#d7c9ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .num.good{background:linear-gradient(135deg,#7dffce,var(--good));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .num.warn{background:linear-gradient(135deg,#ffd27a,var(--warn));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .desc{margin:10px 0 12px;font-size:14.5px;color:var(--text-1)}
+  .src{font-size:11.5px;color:var(--text-3)}
+  .chip{display:inline-block;margin-top:12px;font-size:11px;font-weight:700;letter-spacing:.2px;
+    color:var(--accent);background:rgba(255,61,127,.12);border:1px solid rgba(255,61,127,.28);
+    padding:4px 10px;border-radius:999px}
+
+  /* mapping rows */
+  .map{display:flex;flex-direction:column;gap:12px}
+  .row{display:grid;grid-template-columns:140px 1fr;gap:16px;align-items:center;
+    border:1px solid var(--glass-border);background:var(--panel);border-radius:14px;padding:16px 18px}
+  @media(max-width:680px){.row{grid-template-columns:1fr}}
+  .row .stat{font-size:26px;font-weight:800;letter-spacing:-.5px;color:#fff}
+  .row .stat small{display:block;font-size:11px;font-weight:600;color:var(--text-3);letter-spacing:.2px;margin-top:2px}
+  .row .fix b{color:var(--good)}
+  .row .fix{font-size:14px;color:var(--text-2)}
+  .arrow{color:var(--text-3)}
+
+  /* script tab */
+  .vo{border:1px solid var(--glass-border);background:var(--panel);border-radius:16px;padding:24px}
+  .vo .lead{font-size:20px;line-height:1.5;color:var(--text-1);margin:0 0 4px}
+  .vo .lead em{font-style:normal;font-weight:800;color:var(--accent)}
+  .vo .meta{font-size:12px;color:var(--text-3);margin-top:14px}
+
+  .foot{margin-top:26px;font-size:11px;color:var(--text-3);line-height:1.6}
+  .foot b{color:var(--text-2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">
+    <div class="logo">V</div><b>Vivost</b>
+    <span class="tag">AI chat moderation</span>
+  </div>
+
+  <h1>The harm happens <span>in the first messages.</span></h1>
+  <p class="sub">Scams, threats and off-platform luring all start in chat — exactly where Vivost sits. Every number below maps to something our moderation layer actively blocks, redacts or flags.</p>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="workers">Worker safety</div>
+    <div class="tab" data-tab="customers">Customer protection</div>
+    <div class="tab" data-tab="solve">What Vivost solves</div>
+  </div>
+
+  <!-- WORKERS -->
+  <section class="panel active" id="workers">
+    <div class="grid">
+      <div class="card">
+        <div class="num">#1</div>
+        <div class="desc">Digital harassment — abusive &amp; threatening messages — is the <b>single most common crime</b> online sex workers face (47% have experienced a crime).</div>
+        <div class="src">Beyond the Gaze / National Ugly Mugs, UK (2015)</div>
+        <span class="chip">Blocked by harassment filter</span>
+      </div>
+      <div class="card">
+        <div class="num good">~27%</div>
+        <div class="desc">Lower workplace sexual violence when clients are <b>pre-screened</b> — and ~30% fewer condom refusals.</div>
+        <div class="src">McBride et al., BMC Public Health (2022)</div>
+        <span class="chip">Solved by client screening + strikes</span>
+      </div>
+      <div class="card">
+        <div class="num good">90.5%</div>
+        <div class="desc">of online-only workers say working <b>online improved their safety</b> vs. off-platform, in-person arrangements.</div>
+        <div class="src">Beyond the Gaze, Univ. of Leicester, UK (2018)</div>
+        <span class="chip">Kept on-platform by contact redaction</span>
+      </div>
+      <div class="card">
+        <div class="num warn">7.7%</div>
+        <div class="desc">of incidents now reach <b>police</b> — down from 28%. Almost all harm is invisible to authorities.</div>
+        <div class="src">National Ugly Mugs, UK (2021)</div>
+        <span class="chip">Filled by moderator queue + audit log</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- CUSTOMERS -->
+  <section class="panel" id="customers">
+    <div class="grid">
+      <div class="card">
+        <div class="num warn">41%</div>
+        <div class="desc">of UK push-payment scam losses are <b>never refunded</b> (only 59% reimbursed) — so a deposit scam is money gone for good.</div>
+        <div class="src">UK Finance, Annual Fraud Report (2025)</div>
+        <span class="chip">Stopped before payment by scam block</span>
+      </div>
+      <div class="card">
+        <div class="num">+59%</div>
+        <div class="desc">jump in <b>sextortion / blackmail</b> complaints in a single year — ~55,000 reports. Police warn escort-site customers are targeted.</div>
+        <div class="src">FBI IC3 (2024) · PSNI public warning</div>
+        <span class="chip">Caught by blackmail &amp; threat detection</span>
+      </div>
+      <div class="card">
+        <div class="num">$10,079</div>
+        <div class="desc">median loss when a romance / deposit scam is paid in <b>crypto</b> — the exact untraceable rail scammers push you to off-platform.</div>
+        <div class="src">US FTC (2023)</div>
+        <span class="chip">Blocked by payment-redirection filter</span>
+      </div>
+      <div class="card">
+        <div class="num warn">£106m</div>
+        <div class="desc">lost to <b>romance &amp; dating fraud</b> in the UK in a single year — the umbrella every fake-profile deposit scam sits under.</div>
+        <div class="src">UK Action Fraud / City of London Police (2025)</div>
+        <span class="chip">Reduced by fake-profile &amp; scam flags</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT VIVOST SOLVES -->
+  <section class="panel" id="solve">
+    <div class="map">
+      <div class="row">
+        <div class="stat">#1 crime<small>digital harassment</small></div>
+        <div class="fix"><span class="arrow">→</span> Tier-1 &amp; Tier-2 <b>flag and block abusive / threatening messages</b> in the chat itself.</div>
+      </div>
+      <div class="row">
+        <div class="stat">~27%<small>less violence</small></div>
+        <div class="fix"><span class="arrow">→</span> Vivost <b>is</b> automated client screening — vetting + escalating strikes on repeat offenders.</div>
+      </div>
+      <div class="row">
+        <div class="stat">90.5%<small>safer online</small></div>
+        <div class="fix"><span class="arrow">→</span> <b>Redacts phone numbers &amp; off-platform handles</b> (WhatsApp, Telegram) to keep contact on-platform.</div>
+      </div>
+      <div class="row">
+        <div class="stat">41%<small>never refunded</small></div>
+        <div class="fix"><span class="arrow">→</span> <b>Holds and blocks payment-redirection</b> and deposit scams before any money moves.</div>
+      </div>
+      <div class="row">
+        <div class="stat">7.7%<small>reach police</small></div>
+        <div class="fix"><span class="arrow">→</span> A <b>moderator queue + tamper-evident audit log</b> — a safety net and evidence trail where authorities aren't.</div>
+      </div>
+    </div>
+  </section>
+
+  <p class="foot">
+    <b>Sources:</b> National Ugly Mugs; Beyond the Gaze (Univ. of Leicester); McBride et al., BMC Public Health 2022; UK Finance 2025; UK Action Fraud / City of London Police; FBI IC3 2024; US FTC 2023.
+    Figures are most-recent available; the screening effect on violence is suggestive (p≈0.07), the condom-refusal effect statistically robust. UK figures used where available.
+  </p>
+</div>
+
+<script>
+  const tabs = document.querySelectorAll('.tab');
+  const panels = document.querySelectorAll('.panel');
+  tabs.forEach(t => t.addEventListener('click', () => {
+    tabs.forEach(x => x.classList.remove('active'));
+    panels.forEach(p => p.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById(t.dataset.tab).classList.add('active');
+  }));
+</script>
+</body>
+</html>
